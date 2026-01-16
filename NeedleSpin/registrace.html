@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrace - Hudební Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+   <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23ccc'/%3E%3C/svg%3E" alt="Avatar">
+        </div>
+
+        <nav>
+            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="trziste.html" class="nav-link">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
+        </nav>
+
+        <div style="position: absolute; bottom: 20px; width: 210px;">
+            <a href="#" class="nav-link" onclick="logout()">📤 Odhlásit se</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-bar-container">
+            <div class="search-bar">
+                <button style="background: transparent; border: none; color: white;">☰</button>
+                <input type="text" placeholder="Hledat...">
+                <button style="background: transparent; border: none; color: white;">🔍</button>
+            </div>
+        </div>
+        <div class="login-form">
+            <h2 style="text-align: center; margin-bottom: 20px;">Registrace</h2>
+            
+            <label>Email:</label>
+            <input type="email" id="email" placeholder="Zadej email">
+            
+            <label>Username:</label>
+            <input type="text" id="reg-username" placeholder="Zadej username">
+            
+            <label>Heslo:</label>
+            <input type="password" id="reg-password" placeholder="Zadej heslo">
+            
+            <label>Potvrzení hesla:</label>
+            <input type="password" id="reg-password2" placeholder="Potvrď heslo">
+            
+            <button class="btn-prihlasit" onclick="registrace()">Registrovat se</button>
+            
+            <p style="text-align: center; margin-top: 15px;">
+                Už máš účet? <a href="login.html" style="color: #00d26a;">Přihlas se</a>
+            </p>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

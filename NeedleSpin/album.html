@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Načítání alba...</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="album.css">
+</head>
+<body>
+
+    <a class="back-btn" href="DomovniStranka.html">← Zpět na domovskou stránku</a>
+
+    <div id="loading-msg">
+        <div class="spinner-border text-light" role="status"></div>
+        <div style="margin-top: 20px;">Načítám data z Discogs...</div>
+    </div>
+
+    <div id="error-msg"></div>
+    
+    <div id="album-content" style="display:none;">
+        
+        <div class="album-header">
+            <div class="cover-container">
+                <img id="cover-img" src="" alt="Cover" class="cover-art" onerror="this.src='https://placehold.co/300x300?text=No+Image'">
+            </div>
+            
+            <div class="album-info">
+                <div id="genre-container" class="tags-container"></div>
+                <h1 id="title"></h1>
+                <h2 id="artist"></h2>
+                <div style="color: #888; margin-bottom: 20px;" id="year"></div>
+
+                <div class="album-rating-area">
+                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">Ohodnotit album:</span>
+                        <div class="star-rating big-stars">
+                            <input type="radio" name="album_rate" id="a-5" value="5"><label for="a-5">★</label>
+                            <input type="radio" name="album_rate" id="a-4" value="4"><label for="a-4">★</label>
+                            <input type="radio" name="album_rate" id="a-3" value="3"><label for="a-3">★</label>
+                            <input type="radio" name="album_rate" id="a-2" value="2"><label for="a-2">★</label>
+                            <input type="radio" name="album_rate" id="a-1" value="1"><label for="a-1">★</label>
+                        </div>
+                    </div>
+                    <textarea id="album-comment" placeholder="Napiš krátkou recenzi..."></textarea>
+                    <button class="btn-submit" onclick="odeslatRatingAlba()">Odeslat recenzi</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tracklist-container">
+            <h3>Seznam skladeb</h3>
+            <table id="tracklist-table">
+                <thead>
+                    <tr>
+                        <th class="col-pos">#</th>
+                        <th>Název skladby</th>
+                        <th class="col-dur">Délka</th>
+                        <th class="col-rate">Hodnocení</th>
+                    </tr>
+                </thead>
+                <tbody id="tracklist-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let currentAlbumId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentAlbumId = urlParams.get('id');
+
+            if (!currentAlbumId) {
+                showError("Chyba: V URL chybí ID alba.");
+                return;
+            }
+            loadAlbumData(currentAlbumId);
+        });
+
+        async function loadAlbumData(id) {
+            try {
+                const response = await fetch(`details.php?id=${id}`);
+                if (!response.ok) throw new Error("Chyba serveru.");
+                
+                const data = await response.json();
+                if (data.error) {
+                    showError("Discogs chyba: " + (data.message || data.error));
+                    return;
+                }
+                renderAlbum(data);
+
+            } catch (error) {
+                console.error(error);
+                showError("Nepodařilo se načíst data. Zkontroluj details.php.");
+            }
+        }
+
+        function renderAlbum(data) {
+            const title = data.title || "Neznámý název";
+            const artist = data.artists && data.artists.length > 0 ? data.artists[0].name : "Různí umělci";
+            const year = data.year || "";
+            
+            let coverUrl = 'https://placehold.co/300x300?text=No+Cover';
+            if (data.images && data.images.length > 0) {
+                coverUrl = data.images[0].resource_url || data.images[0].uri; 
+            }
+
+            let genresHtml = "";
+            if (data.genres) data.genres.forEach(g => genresHtml += `<span class="genre-tag">${g}</span>`);
+            
+            document.title = title + " - Detail";
+            document.getElementById('cover-img').src = coverUrl;
+            document.getElementById('title').innerText = title;
+            document.getElementById('artist').innerText = artist;
+            document.getElementById('year').innerText = year ? `Vydáno: ${year}` : "";
+            document.getElementById('genre-container').innerHTML = genresHtml;
+
+            // --- TRACKLIST S HVĚZDIČKAMI ---
+            const tbody = document.getElementById('tracklist-body');
+            let trackHtml = '';
+
+            if (data.tracklist && data.tracklist.length > 0) {
+                data.tracklist.forEach((track, index) => {
+                    // Generujeme unikátní ID pro rádio buttony (s_index_rating)
+                    // Protože nemáme ID písničky z DB, použijeme index (0, 1, 2...)
+                    const fakeId = index + 1; 
+                    
+                    trackHtml += `
+                    <tr>
+                        <td class="col-pos">${track.position || fakeId}</td>
+                        <td>${track.title}</td>
+                        <td class="col-dur">${track.duration || ''}</td>
+                        <td class="col-rate">
+                            <div class="star-rating small-stars">
+                                <input type="radio" name="song_rate_${fakeId}" id="s_${fakeId}_5" value="5" onchange="odeslatRatingSong(${fakeId}, 5)">
+                                <label for="s_${fakeId}_5">★</label>
+                                
+                                <input type="radio" name="song_rate_${fakeId}" id="s_${fakeId}_4" value="4" onchange="odeslatRatingSong(${fakeId}, 4)">
+                                <label for="s_${fakeId}_4">★</label>
+                                
+                                <input type="radio" name="song_rate_${fakeId}" id="s_${fakeId}_3" value="3" onchange="odeslatRatingSong(${fakeId}, 3)">
+                                <label for="s_${fakeId}_3">★</label>
+                                
+                                <input type="radio" name="song_rate_${fakeId}" id="s_${fakeId}_2" value="2" onchange="odeslatRatingSong(${fakeId}, 2)">
+                                <label for="s_${fakeId}_2">★</label>
+                                
+                                <input type="radio" name="song_rate_${fakeId}" id="s_${fakeId}_1" value="1" onchange="odeslatRatingSong(${fakeId}, 1)">
+                                <label for="s_${fakeId}_1">★</label>
+                            </div>
+                        </td>
+                    </tr>
+                    `;
+                });
+            } else {
+                trackHtml = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Seznam skladeb není k dispozici.</td></tr>';
+            }
+            tbody.innerHTML = trackHtml;
+
+            document.getElementById('loading-msg').style.display = 'none';
+            document.getElementById('album-content').style.display = 'block';
+        }
+
+        function showError(msg) {
+            document.getElementById('loading-msg').style.display = 'none';
+            const errEl = document.getElementById('error-msg');
+            errEl.style.display = 'block';
+            errEl.innerText = "⚠️ " + msg;
+        }
+
+        // --- ODESÍLÁNÍ HODNOCENÍ ---
+
+        async function odeslatRatingAlba() {
+            const stars = document.querySelector('input[name="album_rate"]:checked');
+            const comment = document.getElementById('album-comment').value;
+
+            if (!stars) { alert("Vyber prosím hvězdičky!"); return; }
+
+            await sendData({
+                album_id: currentAlbumId, 
+                rating: stars.value,
+                comment: comment
+            });
+        }
+
+       async function odeslatRatingSong(trackIndex, ratingValue) {
+    await sendData({
+        type: 'song',
+        song_id: trackIndex, 
+        album_id: currentAlbumId,
+        rating: ratingValue,
+        comment: ""
+    });
+}
+        
+
+        async function sendData(dataObj) {
+            try {
+                const res = await fetch('rate.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dataObj)
+                });
+                
+                const text = await res.text();
+                try {
+                    const result = JSON.parse(text);
+                    if (result.success) {
+                        console.log("Uloženo: " + result.message);
+                        if(dataObj.comment !== "") alert("✅ " + result.message); 
+                    } else {
+                        alert("❌ " + result.message);
+                    }
+                } catch (e) {
+                    console.error("Server error:", text);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Chyba spojení.");
+            }
+        }
+    </script>
+</body>
+</html>
