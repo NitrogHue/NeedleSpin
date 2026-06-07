@@ -47,5 +47,72 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
+    <script>
+        // Otevírání/zavírání dropdownu pro řazení
+        function toggleSortPopup(e) { 
+            e.stopPropagation(); 
+            const p = document.getElementById('sort-popup'); 
+            p.style.display = p.style.display === 'block' ? 'none' : 'block'; 
+        }
+        
+        document.addEventListener('click', () => { 
+            const p = document.getElementById('sort-popup'); 
+            if (p) p.style.display = 'none'; 
+        });
+
+        // Nyní je výchozí řazení Abecední (A-Z)
+        let currentSortMethod = 'az';
+
+        // Výběr možnosti z menu
+        function sortAlbums(method, label, el, e) {
+            e.stopPropagation(); 
+            currentSortMethod = method;
+            document.getElementById('current-sort-label').innerText = label;
+            document.querySelectorAll('.sort-option').forEach(opt => opt.classList.remove('active'));
+            el.classList.add('active'); 
+            document.getElementById('sort-popup').style.display = 'none';
+            executeSort(); 
+        }
+
+        // ZJEDNODUŠENÁ FUNKCE PRO ŘAZENÍ JEN PODLE ABECEDY
+        function executeSort() {
+            const grid = document.getElementById('resultsGrid');
+            const items = Array.from(grid.children).filter(c => c.tagName === 'DIV' && !c.id.includes('empty-state'));
+            
+            if (items.length === 0) return;
+
+            const mappedItems = items.map(el => {
+                let title = "";
+                const titleEl = el.querySelector('h5, h4, .card-title, .fw-bold, strong');
+                if (titleEl) title = titleEl.innerText.trim().toLowerCase();
+                return { el: el, title: title };
+            });
+
+            mappedItems.sort((a, b) => {
+                if (currentSortMethod === 'az') return a.title.localeCompare(b.title);
+                if (currentSortMethod === 'za') return b.title.localeCompare(a.title);
+                return 0;
+            });
+
+            mappedItems.forEach(item => grid.appendChild(item.el));
+        }
+
+        const observer = new MutationObserver(() => { 
+            observer.disconnect(); 
+            executeSort(); 
+            observer.observe(document.getElementById('resultsGrid'), { childList: true }); 
+        });
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            observer.observe(document.getElementById('resultsGrid'), { childList: true });
+        });
+
+        function openPrivacyModal() {
+            document.getElementById('privacyModal').style.display = 'flex';
+        }
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
