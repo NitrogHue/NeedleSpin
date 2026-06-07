@@ -1,15 +1,46 @@
-/* --- ZÁKLADNÍ NASTAVENÍ (DESKTOP - beze změny) --- */
+/* --- DEFINICE PROMĚNNÝCH (Základ tvého webu) --- */
+:root {
+    /* Tmavý mód (Výchozí) [cite: 1] */
+    --bg-main: #1a1a2e;
+    --bg-sidebar: #ff6b35; 
+    --bg-card: #2d2d44;
+    --bg-icon: #3d3d54;
+    --text-main: #ffffff;
+    --text-muted: #aaa;
+    --input-bg: #3d3d54;
+    --input-border: #4d4d64;
+    --accent: #e55a2b;
+    --nav-text: #ffffff;
+}
+
+body.light-mode {
+    /* Light mód dle vzoru [cite: 2, 3, 4] */
+    --bg-main: #f0f2f5;
+    --bg-sidebar: #ffffff; 
+    --bg-card: #ffffff;
+    --bg-icon: #e9ecef;
+    --text-main: #1a1a2e;
+    --text-muted: #555;
+    --input-bg: #ffffff;
+    --input-border: #dddddd;
+    --accent: #ff6b35;
+    --nav-text: #444;
+}
+
+/* --- ZÁKLADNÍ NASTAVENÍ --- */
 body {
-    background-color: #1a1a2e;
-    color: white;
+    background-color: var(--bg-main) !important;
+    color: var(--text-main) !important;
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    transition: 0.3s;
 }
 
-/* Sidebar pro Desktop (fixní vlevo) */
+/* --- SIDEBAR DESIGN (DESKTOP) --- */
 .sidebar {
-    background-color: #ff6b35;
+    background-color: var(--bg-sidebar) !important;
     height: 100vh;
     position: fixed;
     top: 0;
@@ -18,7 +49,10 @@ body {
     padding: 20px;
     box-sizing: border-box;
     z-index: 1000;
-    display: block; /* Defaultní zobrazení */
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--input-border);
+    transition: 0.3s;
 }
 
 .sidebar .profile {
@@ -27,37 +61,48 @@ body {
 }
 
 .sidebar .profile img {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     background-color: white;
-    padding: 5px;
+    padding: 2px;
     object-fit: cover;
 }
 
 .sidebar .nav-link {
-    color: white;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
+    color: var(--nav-text) !important;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 12px;
     text-decoration: none;
-    display: block;
-    transition: background 0.3s;
-    text-align: left; /* Na desktopu text vlevo */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: 0.2s;
+    font-weight: 500;
+    text-align: left;
 }
 
-.sidebar .nav-link:hover {
-    background-color: #e55a2b;
+/* Aktivní odkaz (Oranžový čip) */
+.sidebar .nav-link.active {
+    background-color: var(--accent) !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
 }
 
-/* Hlavní obsah */
+.sidebar .nav-link:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* --- HLAVNÍ OBSAH --- */
 .main-content {
     margin-left: 250px;
     padding: 30px;
     min-height: 100vh;
+    transition: 0.3s;
 }
 
-/* Search Bar */
+/* --- SEARCH BAR --- */
 .search-bar-container {
     display: flex;
     justify-content: center;
@@ -65,7 +110,8 @@ body {
 }
 
 .search-bar {
-    background-color: #5a5a7a;
+    background-color: var(--bg-card);
+    border: 1px solid var(--input-border);
     padding: 10px 20px;
     border-radius: 30px;
     display: flex;
@@ -77,14 +123,14 @@ body {
 .search-bar input {
     background: transparent;
     border: none;
-    color: white;
+    color: var(--text-main);
     flex: 1;
     outline: none;
     margin: 0 10px;
     font-size: 16px;
 }
 
-/* Grid pro Alba */
+/* --- GRID A KARTY --- */
 .album-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -92,148 +138,105 @@ body {
 }
 
 .album-card {
-    background-color: #2d2d44;
+    background-color: var(--bg-card);
+    border: 1px solid var(--input-border);
     border-radius: 10px;
     padding: 20px;
     text-align: center;
 }
 
-.album-icon {
-    background-color: #3d3d54;
-    height: 150px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 50px;
-    margin-bottom: 15px;
-}
-
-/* Login formulář */
+/* --- LOGIN FORMULÁŘ [cite: 22, 23] --- */
 .login-form {
     max-width: 400px;
     width: 100%;
     margin: 50px auto;
-    background-color: #2d2d44;
+    background-color: var(--bg-card);
+    border: 1px solid var(--input-border);
     padding: 30px;
     border-radius: 10px;
     box-sizing: border-box;
 }
 
 .login-form input {
-    background-color: #d3d3d3;
-    border: none;
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-main);
     padding: 12px;
     border-radius: 8px;
     width: 100%;
     margin-bottom: 15px;
-    box-sizing: border-box;
-}
-
-.login-form label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.btn-prihlasit, .btn-google {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    font-size: 16px;
 }
 
 .btn-prihlasit {
     background-color: #00d26a;
     color: white;
-    margin-bottom: 10px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    border: none;
 }
 
-.btn-prihlasit:hover {
-    background-color: #00b85a;
-}
-
-.btn-google {
-    background-color: white;
-    color: #333;
-}
-
-.btn-google:hover {
-    background-color: #f0f0f0;
-}
-
-
-/* --- UPRAVENÁ RESPONZIVITA (MOBILNÍ BOTTOM BAR) --- */
+/* --- OPRAVENÁ RESPONZIVITA (MOBILNÍ BOTTOM BAR) [cite: 28, 30, 31, 32] --- */
 @media (max-width: 768px) {
-    
-    /* 1. Sidebar přesuneme dolů jako Bottom Navigation Bar */
     .sidebar {
         width: 100%;
-        height: auto; /* Výška podle obsahu */
-        position: fixed; /* Fixní pozice */
-        top: auto; /* Zrušíme horní ukotvení */
-        bottom: 0; /* Přilepíme dolů */
+        height: auto; 
+        position: fixed;
+        top: auto;
+        bottom: 0;
         left: 0;
-        padding: 10px;
+        padding: 5px 0; /* Minimalizovaný padding pro více místa */
         display: flex;
-        justify-content: space-around; /* Rozmístí ikony rovnoměrně */
+        flex-direction: column; 
+        justify-content: center;
         align-items: center;
-        box-shadow: 0 -4px 10px rgba(0,0,0,0.3); /* Stín nahoru pro oddělení */
-        border-top-left-radius: 15px; /* Zaoblení rohů nahoře */
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+        border-top-left-radius: 15px;
         border-top-right-radius: 15px;
+        background-color: var(--bg-sidebar) !important;
+        border-right: none;
+        border-top: 1px solid var(--input-border);
     }
 
-    /* 2. Profilovku na spodní liště schováme (zabírá moc místa) */
     .sidebar .profile {
-        display: none;
+        display: none; /* Skrytí profilu na mobilu [cite: 36] */
     }
 
-    /* 3. Úprava navigačních odkazů */
     .sidebar nav {
         display: flex;
         width: 100%;
-        justify-content: space-around;
-        padding: 0;
+        justify-content: space-evenly; /* Rovnoměrné rozprostření všech prvků */
+        padding: 0 2px;
     }
 
     .sidebar .nav-link {
         margin-bottom: 0;
-        padding: 8px;
+        padding: 5px 2px; /* Minimální odsazení do stran */
         text-align: center;
-        flex: 1; /* Každé tlačítko má stejnou šířku */
-        font-size: 14px; /* Menší písmo */
+        flex: 1; 
+        font-size: 9px; /* Zmenšené písmo, aby se vešlo i Přihlášení [cite: 39] */
         display: flex;
-        flex-direction: column; /* Pokud bys tam měl i ikony, budou nad textem */
+        flex-direction: column;
         align-items: center;
+        white-space: nowrap; /* Zabrání zalamování textu */
     }
 
-    /* 4. Hlavní obsah - reset marginu a přidání místa dole */
+    /* Úprava obsahu, aby nebyl schovaný pod lištou [cite: 42, 44] */
     .main-content {
         margin-left: 0;
         padding: 20px;
-        padding-bottom: 80px; /* DŮLEŽITÉ: Místo, aby obsah nezajel pod lištu */
+        padding-bottom: 100px; 
     }
-
-    /* Login a Alba */
-    .album-icon {
-        height: 120px;
-    }
-
+    
     .login-form {
-        margin-top: 20px;
-        margin-bottom: 80px; /* Aby formulář nebyl schovaný pod lištou */
+        margin-bottom: 100px;
     }
 }
 
-/* Malé telefony */
-@media (max-width: 480px) {
-    .album-container {
-        grid-template-columns: 1fr; /* Jeden sloupec */
-    }
-    
+/* Extrémně malé telefony */
+@media (max-width: 380px) {
     .sidebar .nav-link {
-        font-size: 12px; /* Ještě menší písmo, aby se vešlo */
+        font-size: 8px; /* Ještě menší písmo pro nejmenší displeje [cite: 46] */
     }
 }

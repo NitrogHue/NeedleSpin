@@ -3,60 +3,579 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Můj profil - Hudební Store</title>
+    <title>NeedleSpin - Profil</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="profil.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        .profile-cards-row {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        :root { 
+            --bg-main: #1a1a2e; --bg-sidebar: #ff6b35; --bg-card: #2d2d44; 
+            --text-main: #ffffff; --text-muted: #aaa; --border-color: #5a5a7a; 
+            --accent: #ff6b35; --input-bg: #1a1a2e; 
+        }
+        body.light-mode { 
+            --bg-main: #f0f2f5; --bg-sidebar: #ffffff; --bg-card: #ffffff; 
+            --text-main: #1a1a2e; --text-muted: #555; --border-color: #cccccc; 
+            --input-bg: #f9f9f9; 
+        }
+        body.dark-mode { 
+            --bg-main: #0a0a0a; --bg-sidebar: #111111; --bg-card: #161616; 
+            --text-main: #e0e0e0; --text-muted: #777; --border-color: #333; 
+            --accent: #ff4500; --input-bg: #0a0a0a; 
+        }
+
+        body { background-color: var(--bg-main) !important; color: var(--text-main) !important; font-family: Arial, sans-serif; transition: 0.3s; min-height: 100vh; margin: 0; }
+        
+        .sidebar { background-color: var(--bg-sidebar) !important; height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s;}
+        
+        /* VYCENTROVÁNÍ PROFILOVKY */
+        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; width: 100%; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
+        
+        .sidebar .nav-link { color: var(--text-main) !important; padding: 12px; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px; }
+        .sidebar .nav-link.active { background-color: var(--accent) !important; color: white !important; }
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+        
+        .profile-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .nav-tabs { border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+        .nav-tabs .nav-link { color: var(--text-muted); border: none; border-bottom: 3px solid transparent; border-radius: 0; padding: 10px 20px; font-weight: bold; }
+        .nav-tabs .nav-link.active { color: var(--accent) !important; background: transparent; border-bottom: 3px solid var(--accent); }
+        .table { color: var(--text-main) !important; }
+        .table th, .table td { border-color: var(--border-color) !important; background-color: transparent !important; }
+        
+        .user-list-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
+        .user-list-item:hover { background-color: rgba(255, 107, 53, 0.05); }
+        .user-list-item img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 15px; }
+        
+        .form-switch .form-check-input { width: 3em; height: 1.5em; cursor: pointer; }
+        .form-switch .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+        .custom-input { background-color: var(--input-bg) !important; color: var(--text-main) !important; border: 1px solid var(--border-color) !important; }
+        .custom-input:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25) !important; }
+
+        #login-overlay {
+            display: none;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 50px 20px;
+            text-align: center;
+            margin-top: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        #login-overlay i { font-size: 60px; color: var(--accent); margin-bottom: 20px; }
+        #login-overlay h2 { color: var(--text-main); margin-bottom: 15px; }
+        #login-overlay p { color: var(--text-muted); margin-bottom: 25px; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100% !important; height: auto !important; position: fixed !important; bottom: 0 !important; top: auto !important; left: 0 !important; padding: 10px 5px !important; flex-direction: row !important; justify-content: space-around !important; border-top: 1px solid var(--border-color); border-right: none; }
+            .sidebar .profile { display: none; }
+            .sidebar nav { display: flex !important; width: 100%; justify-content: space-around; }
+            .sidebar .nav-link { margin-bottom: 0; padding: 8px; font-size: 14px; }
+            .main-content { margin-left: 0 !important; padding: 15px !important; padding-bottom: 80px !important; }
         }
     </style>
 </head>
 <body>
-    <div class="back-arrow" onclick="window.location.href='DomovniStranka.html'">
-        ← Zpět
-    </div>
-    <div class="profile-container">
-        <div class="profile-content">
-            
-            <div class="profile-header">
-                <h1>Můj profil</h1>
-            </div>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'light') document.body.classList.add('light-mode');
+            else if (theme === 'dark') document.body.classList.add('dark-mode');
+        })();
+    </script>
 
-            <div class="profile-cards-row">
-                <div class="profile-card">
-                    <h3>Změnit uživatelské jméno</h3>
-                    
-                    <label>Nové uživatelské jméno</label>
-                    <input type="text" id="new-username" placeholder="Zadej nové username">
-                    
-                    <label>Heslo (pro potvrzení)</label>
-                    <input type="password" id="username-password" placeholder="Zadej své heslo">
-                    
-                    <button class="btn-save" onclick="zmenaJmena()">Změnit username</button>
-                </div>
-                <div class="profile-card">
-                    <h3>Změnit heslo</h3>
-                    
-                    <label>Staré heslo</label>
-                    <input type="password" id="old-password" placeholder="Zadej staré heslo">
-                    
-                    <label>Nové heslo</label>
-                    <input type="password" id="new-password" placeholder="Zadej nové heslo">
-                    
-                    <label>Potvrzení nového hesla</label>
-                    <input type="password" id="new-password2" placeholder="Potvrď nové heslo">
-                    
-                    <button class="btn-save" onclick="zmenaHesla()">Změnit heslo</button>
-                </div>
-            </div>
-
+    <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="https://placehold.co/80" alt="Avatar">
+        </div>
+        <nav style="width: 100%;">
+            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link">📦 Inventář</a>
+            <a href="trziste.html" class="nav-link">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="profil.html" class="nav-link active" id="sidebar-profile-link" style="font-weight: bold;">👤 Můj Profil</a>
+        </nav>
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
+            <a href="#" class="nav-link" onclick="odhlasit()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
         </div>
     </div>
 
+    <div class="main-content">
+        <div id="login-overlay">
+            <i class="fas fa-lock"></i>
+            <h2>Přístup odepřen</h2>
+            <p>Pro zobrazení svého nebo cizího profilu se musíš nejprve přihlásit.</p>
+            <a href="login.html" class="btn btn-primary fw-bold" style="padding: 10px 30px;">Přihlásit se</a>
+        </div>
+
+        <div id="main-profile-content" style="display: none;">
+            <div class="profile-card d-flex align-items-center gap-4 position-relative flex-wrap">
+                <img src="https://placehold.co/120" alt="Profilovka" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                <div class="flex-grow-1">
+                    <h1 class="mb-1" id="profile-username" style="color: var(--text-main);">Načítám...</h1>
+                    <p class="mb-2" style="color: var(--text-muted);"><i class="fas fa-star text-warning"></i> Body: <span id="profile-points" class="fw-bold" style="color: var(--text-main);">...</span></p>
+                    <div class="d-flex gap-4 small" style="color: var(--text-muted);">
+                        <span><strong id="friends-count" style="color: var(--text-main);">0</strong> Přátel</span>
+                        <span><strong id="followers-count" style="color: var(--text-main);">0</strong> Sledujících</span>
+                    </div>
+                </div>
+                
+                <div id="foreign-profile-actions" style="display: none;" class="d-flex flex-column gap-2 flex-shrink-0">
+                    <button id="btn-friend-action" class="btn btn-primary fw-bold text-nowrap"></button>
+                    <button id="btn-follow-action" class="btn btn-outline-info fw-bold text-nowrap"></button>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" id="social-tab" data-bs-toggle="tab" data-bs-target="#social" type="button" role="tab"><i class="fas fa-users"></i> Komunita</button></li>
+                <li class="nav-item"><button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab"><i class="fas fa-chart-pie"></i> Statistiky</button></li>
+                <li class="nav-item" id="settings-nav-item"><button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab"><i class="fas fa-cog"></i> Nastavení</button></li>
+            </ul>
+
+            <div class="tab-content" id="profileTabsContent">
+                
+                <div class="tab-pane fade show active" id="social" role="tabpanel">
+                    <div id="friend-requests-section" style="display: none;">
+                        <div class="profile-card border-warning">
+                            <h4 class="h5 mb-3 text-warning"><i class="fas fa-bell"></i> Nové žádosti o přátelství</h4>
+                            <div id="requests-list-grid"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6" id="search-friend-card">
+                            <div class="profile-card">
+                                <h4 class="h5 mb-3">Vyhledat přátele</h4>
+                                <div class="input-group mb-3">
+                                    <input type="text" id="search-friend-input" class="form-control custom-input" placeholder="Napiš jméno...">
+                                    <button class="btn btn-primary" onclick="searchFriends()">Hledat</button>
+                                </div>
+                                <div id="search-results-grid"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" id="friends-list-container">
+                            <div class="profile-card h-100">
+                                <h4 class="h5 mb-4" id="friends-list-title" style="color: var(--text-main);">Moji Přátelé</h4>
+                                <div id="friends-list-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="stats" role="tabpanel">
+                    <div class="row g-4" id="stats-content-wrapper">
+                        <div class="col-lg-8">
+                            <div class="profile-card h-100">
+                                <h4 class="h5 mb-4" style="color: var(--text-main);">Rozložení hodnocení</h4>
+                                <div class="d-flex align-items-end justify-content-between h-100 pb-3 w-100">
+                                    <div style="width: 75%; height: 200px; position: relative;"><canvas id="ratingChart"></canvas></div>
+                                    <div class="text-center" style="width: 25%;">
+                                        <div id="average-rating-display" style="font-size: 3.5rem; font-weight: 300; line-height: 1; color: var(--text-main);">0.0</div>
+                                        <div class="text-success mt-1 fs-5"><i class="fas fa-star"></i></div>
+                                        <div class="small mt-2" id="total-ratings-display" style="color: var(--text-muted);">0 hodnocení</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="profile-card h-100">
+                                <h4 class="h5 mb-4" style="color: var(--text-main);">Nejhodnotnější alba</h4>
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <thead><tr><th style="color: var(--text-muted); border-bottom-color: var(--border-color);">Album</th><th class="text-end" style="color: var(--text-muted); border-bottom-color: var(--border-color);">Hodnota</th></tr></thead>
+                                        <tbody id="valuable-albums-table">
+                                            <tr><td><div class="fw-bold" style="color: var(--text-main);">Načítám...</div></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="settings" role="tabpanel">
+                    <div class="profile-card mb-4">
+                        <h4 class="h5 mb-4"><i class="fas fa-paint-brush"></i> Vzhled aplikace</h4>
+                        <div class="d-flex align-items-center p-3 rounded" style="background-color: rgba(0,0,0,0.1); border: 1px solid var(--border-color);">
+                            <div class="w-100">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="small fw-bold" style="color: var(--text-main);"><i class="fas fa-sun text-warning"></i> Světlý</span>
+                                    <span class="small fw-bold" style="color: var(--text-main); opacity: 0.7;">Výchozí</span>
+                                    <span class="small fw-bold" style="color: var(--text-main);"><i class="fas fa-moon" style="color: #64748b;"></i> Tmavý</span>
+                                </div>
+                                <input type="range" class="form-range" min="0" max="2" id="theme-slider" onchange="changeTheme(this.value)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-card mb-4">
+                        <h4 class="h5 mb-4"><i class="fas fa-shield-alt"></i> Soukromí a Bezpečnost</h4>
+                        <div class="d-flex justify-content-between align-items-center p-3 rounded" style="background-color: rgba(0,0,0,0.1); border: 1px solid var(--border-color);">
+                            <div><div class="fw-bold mb-1">Skrýt uživatelské statistiky</div><small class="text-muted">Ostatní hráči neuvidí tvou aktivitu a hodnocení.</small></div>
+                            <div class="form-check form-switch fs-4 mb-0"><input class="form-check-input" type="checkbox" id="hideStatsToggle" onchange="togglePrivacy(this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                            <div class="profile-card h-100">
+                                <h4 class="h5 mb-3"><i class="fas fa-user-edit"></i> Změna Jména</h4>
+                                <div class="mb-3"><label class="form-label small fw-bold" style="color: var(--text-main);">Nové jméno</label><input type="text" id="new-username" class="form-control custom-input" placeholder="Zadej nové jméno"></div>
+                                <div class="mb-4"><label class="form-label small fw-bold" style="color: var(--text-main);">Současné heslo</label><input type="password" id="username-password" class="form-control custom-input" placeholder="Zadej aktuální heslo"></div>
+                                <button class="btn btn-primary w-100 fw-bold" onclick="zmenaJmena()">Uložit</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="profile-card h-100">
+                                <h4 class="h5 mb-3"><i class="fas fa-key"></i> Změna Hesla</h4>
+                                <div class="mb-3"><label class="form-label small fw-bold" style="color: var(--text-main);">Staré heslo</label><input type="password" id="old-password" class="form-control custom-input" placeholder="Zadej staré heslo"></div>
+                                <div class="mb-3"><label class="form-label small fw-bold" style="color: var(--text-main);">Nové heslo</label><input type="password" id="new-password" class="form-control custom-input" placeholder="Zadej nové heslo"></div>
+                                <div class="mb-4"><label class="form-label small fw-bold" style="color: var(--text-main);">Potvrzení hesla</label><input type="password" id="new-password2" class="form-control custom-input" placeholder="Nové heslo znovu"></div>
+                                <button class="btn btn-warning w-100 fw-bold" onclick="zmenaHesla()">Uložit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
+    
+    <script>
+        function changeTheme(val) {
+            document.body.classList.remove('light-mode', 'dark-mode');
+            if (val == 0) { document.body.classList.add('light-mode'); localStorage.setItem('theme', 'light'); } 
+            else if (val == 2) { document.body.classList.add('dark-mode'); localStorage.setItem('theme', 'dark'); } 
+            else { localStorage.setItem('theme', 'default'); }
+        }
+
+        async function togglePrivacy(checkboxElement) {
+            const fd = new FormData();
+            fd.append('hide_stats', checkboxElement.checked ? '1' : '0');
+            try {
+                const res = await fetch('update_privacy.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (!data.success) {
+                    alert("Nepodařilo se uložit nastavení soukromí.");
+                    checkboxElement.checked = !checkboxElement.checked;
+                }
+            } catch (e) {
+                console.error("Chyba:", e);
+                checkboxElement.checked = !checkboxElement.checked;
+            }
+        }
+
+        async function removeFriend(friendId) {
+            if(!confirm("Opravdu chceš odebrat tohoto hráče z přátel?")) return;
+            const fd = new FormData(); 
+            fd.append('action', 'remove_friend'); 
+            fd.append('friend_id', friendId);
+            try {
+                const res = await fetch('social_api.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) loadProfileData(); 
+            } catch (e) { console.error(e); }
+        }
+
+        async function toggleFollow(targetId, btnElement) {
+            const fd = new FormData(); 
+            fd.append('action', 'toggle_follow'); 
+            fd.append('target_id', targetId);
+            try {
+                const res = await fetch('social_api.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.is_following) {
+                        btnElement.className = 'btn btn-secondary fw-bold text-nowrap';
+                        btnElement.innerHTML = '<i class="fas fa-user-slash"></i> Zrušit sledování';
+                    } else {
+                        btnElement.className = 'btn btn-info text-white fw-bold text-nowrap';
+                        btnElement.innerHTML = '<i class="fas fa-user-check"></i> Sledovat';
+                    }
+                    let currentCount = parseInt(document.getElementById('followers-count').innerText);
+                    document.getElementById('followers-count').innerText = data.is_following ? currentCount + 1 : currentCount - 1;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadProfileData() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const targetId = urlParams.get('id');
+                const queryParam = targetId ? `&id=${targetId}` : '';
+
+                const response = await fetch('get_profile.php?t=' + new Date().getTime() + queryParam);
+                const data = await response.json();
+
+                // POKUD SE NEPODAŘÍ ZÍSKAT DATA (NENÍ PŘIHLÁŠEN)
+                if (!data.success) { 
+                    console.error("Chyba z PHP:", data.message);
+                    document.getElementById('login-overlay').style.display = 'block';
+                    document.getElementById('main-profile-content').style.display = 'none';
+                    return; 
+                }
+
+                // POKUD JE PŘIHLÁŠEN, UKÁŽEME OBSAH PROFILU
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-profile-content').style.display = 'block';
+
+                document.getElementById('profile-username').innerText = data.username;
+                document.getElementById('friends-count').innerText = data.friends ? data.friends.length : 0;
+                document.getElementById('followers-count').innerText = data.followers_count !== undefined ? data.followers_count : 0;
+
+                if (!data.is_own_profile) {
+                    document.getElementById('settings-nav-item').style.display = 'none';
+                    document.getElementById('search-friend-card').style.display = 'none';
+                    document.getElementById('friend-requests-section').style.display = 'none';
+                    
+                    document.getElementById('friends-list-container').classList.remove('col-md-6');
+                    document.getElementById('friends-list-container').classList.add('col-12');
+                    document.getElementById('friends-list-title').innerText = `Přátelé hráče ${data.username}`;
+                    document.title = `Profil - ${data.username}`;
+                    document.getElementById('sidebar-profile-link').classList.remove('active');
+
+                    document.getElementById('foreign-profile-actions').style.display = 'flex';
+                    
+                    const btnFriend = document.getElementById('btn-friend-action');
+                    const btnFollow = document.getElementById('btn-follow-action');
+
+                    if (data.relation) {
+                        if (data.relation.friend_status === 'accepted') {
+                            btnFriend.className = 'btn btn-danger fw-bold text-nowrap';
+                            btnFriend.innerHTML = '<i class="fas fa-user-minus"></i> Odebrat z přátel';
+                            btnFriend.onclick = () => removeFriend(targetId);
+                            btnFriend.disabled = false;
+                        } else if (data.relation.friend_status === 'pending_sent') {
+                            btnFriend.className = 'btn btn-secondary fw-bold text-nowrap';
+                            btnFriend.innerHTML = '<i class="fas fa-clock"></i> Žádost odeslána';
+                            btnFriend.onclick = null;
+                            btnFriend.disabled = true;
+                        } else {
+                            btnFriend.className = 'btn btn-primary fw-bold text-nowrap';
+                            btnFriend.innerHTML = '<i class="fas fa-user-plus"></i> Přidat do přátel';
+                            btnFriend.onclick = () => sendFriendRequest(targetId, btnFriend);
+                            btnFriend.disabled = false;
+                        }
+                        
+                        if (data.relation.is_following) {
+                            btnFollow.className = 'btn btn-secondary fw-bold text-nowrap';
+                            btnFollow.innerHTML = '<i class="fas fa-user-slash"></i> Zrušit sledování';
+                        } else {
+                            btnFollow.className = 'btn btn-info text-white fw-bold text-nowrap';
+                            btnFollow.innerHTML = '<i class="fas fa-user-check"></i> Sledovat';
+                        }
+                        btnFollow.onclick = () => toggleFollow(targetId, btnFollow);
+                    }
+
+                } else {
+                    const actionsDiv = document.getElementById('foreign-profile-actions');
+                    if (actionsDiv) {
+                        actionsDiv.style.display = 'none';
+                        actionsDiv.innerHTML = ''; 
+                    }
+                    document.getElementById('hideStatsToggle').checked = data.hide_stats_enabled;
+                }
+                
+                // SKRYTÍ / VYKRESLENÍ GRAFŮ A TABULEK
+                if (data.stats_hidden_from_viewer) {
+                    document.getElementById('profile-points').innerText = "Skryto";
+                    document.getElementById('stats-content-wrapper').innerHTML = `
+                        <div class="col-12">
+                            <div class="profile-card text-center py-5">
+                                <i class="fas fa-user-secret fa-4x mb-3" style="color: var(--accent);"></i>
+                                <h4 style="color: var(--text-main);">Statistiky jsou soukromé</h4>
+                                <p class="small mb-0" style="color: var(--text-muted);">Tento hráč si nepřeje sdílet svou aktivitu a hodnocení s ostatními.</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('profile-points').innerText = data.body ? parseInt(data.body).toLocaleString() : "0";
+                    
+                    if (data.ratingData && data.averageRating !== undefined) {
+                        document.getElementById('average-rating-display').innerText = parseFloat(data.averageRating).toFixed(1);
+                        const totalRatings = data.ratingData.reduce((a, b) => a + Number(b), 0);
+                        document.getElementById('total-ratings-display').innerText = totalRatings + " hodnocení";
+                        renderRatingChart(data.ratingData);
+                    } else {
+                        renderRatingChart([0,0,0,0,0]);
+                    }
+
+                    const valTable = document.getElementById('valuable-albums-table');
+                    valTable.innerHTML = '';
+                    if (!data.valuableAlbums || data.valuableAlbums.length === 0) {
+                        valTable.innerHTML = `<tr><td><div class="fw-bold" style="color: var(--text-main);">Zatím prázdné</div><small style="color: var(--text-muted);">-</small></td><td class="text-end fw-bold" style="color: var(--text-muted);">0 B</td></tr>`;
+                    } else {
+                        data.valuableAlbums.forEach(album => {
+                            const imgUrl = album.cover_url || 'https://placehold.co/40';
+                            const safeName = (album.nazev && album.nazev !== 'undefined') ? album.nazev : 'Neznámé album';
+                            valTable.innerHTML += `
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="${imgUrl}" alt="cover" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; margin-right: 12px; border: 1px solid var(--border-color);">
+                                            <div class="fw-bold text-truncate" style="color: var(--text-main); max-width: 130px;" title="${safeName}">${safeName}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end text-success fw-bold">${album.sell_price} B</td>
+                                </tr>`;
+                        });
+                    }
+                }
+
+                // Přátelé a Žádosti
+                const friendsGrid = document.getElementById('friends-list-grid');
+                friendsGrid.innerHTML = '';
+                if (!data.friends || data.friends.length === 0) {
+                    friendsGrid.innerHTML = '<div class="text-center p-3" style="color: var(--text-main); opacity: 0.6; font-style: italic;">Zatím žádní přátelé.</div>';
+                } else {
+                    data.friends.forEach(f => {
+                        friendsGrid.innerHTML += `
+                            <div class="user-list-item" style="cursor: pointer;" onclick="window.location.href='profil.html?id=${f.user_id}'">
+                                <div class="d-flex align-items-center">
+                                    <img src="https://placehold.co/40" alt="avatar">
+                                    <div class="fw-bold" style="margin-left: 10px;">${f.uzivatelskeJmeno}</div>
+                                </div>
+                                <span class="badge bg-success">Zobrazit profil</span>
+                            </div>`;
+                    });
+                }
+
+                const reqSection = document.getElementById('friend-requests-section');
+                const reqGrid = document.getElementById('requests-list-grid');
+                reqGrid.innerHTML = '';
+                if (data.is_own_profile && data.requests && data.requests.length > 0) {
+                    reqSection.style.display = 'block';
+                    data.requests.forEach(req => {
+                        reqGrid.innerHTML += `
+                            <div class="user-list-item border-warning border-opacity-25">
+                                <div class="d-flex align-items-center" style="cursor: pointer;" onclick="window.location.href='profil.html?id=${req.user_id}'">
+                                    <img src="https://placehold.co/40" alt="avatar">
+                                    <div style="margin-left: 10px;"><div class="fw-bold">${req.uzivatelskeJmeno}</div><small class="text-muted">Chce si tě přidat</small></div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-success" onclick="respondRequest(${req.request_id}, 'accept')"><i class="fas fa-check"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="respondRequest(${req.request_id}, 'decline')"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    reqSection.style.display = 'none';
+                }
+
+            } catch (e) { 
+                console.error("Chyba JS:", e); 
+                document.getElementById('login-overlay').style.display = 'block';
+                document.getElementById('main-profile-content').style.display = 'none';
+            }
+        }
+
+        let ratingChartInstance = null;
+
+        function renderRatingChart(dataArray) {
+            const canvas = document.getElementById('ratingChart');
+            if(!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const safeData = dataArray.map(val => Number(val));
+            const barColor = '#ff6b35'; 
+            const isDark = document.body.classList.contains('light-mode') ? false : true;
+
+            if (ratingChartInstance) { ratingChartInstance.destroy(); }
+
+            ratingChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1★', '2★', '3★', '4★', '5★'],
+                    datasets: [{
+                        label: 'Počet hodnocení',
+                        data: safeData,
+                        backgroundColor: barColor,
+                        borderRadius: 4, 
+                        barPercentage: 0.9,
+                        categoryPercentage: 1.0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { title: () => null, label: (ctx) => `${ctx.raw}x hodnoceno` } } },
+                    scales: {
+                        x: { grid: { display: false, drawBorder: false }, ticks: { color: isDark ? '#aaa' : '#555', font: { size: 14 } } },
+                        y: { display: false, beginAtZero: true, suggestedMax: 5 }
+                    },
+                    interaction: { mode: 'index', intersect: false }
+                }
+            });
+        }
+
+        async function searchFriends() {
+            const inputVal = document.getElementById('search-friend-input').value;
+            const resultsGrid = document.getElementById('search-results-grid');
+            resultsGrid.innerHTML = '<div class="text-center p-3" style="color: var(--text-main); opacity: 0.6;"><i class="fas fa-spinner fa-spin"></i> Hledám...</div>';
+            const fd = new FormData(); fd.append('action', 'search_users'); fd.append('query', inputVal);
+            try {
+                const res = await fetch('social_api.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                resultsGrid.innerHTML = '';
+                
+                if (data.users.length === 0) { 
+                    resultsGrid.innerHTML = '<div class="text-center p-3" style="color: var(--text-main); opacity: 0.6; font-style: italic;">Žádný uživatel nenalezen.</div>'; 
+                    return; 
+                }
+                
+                data.users.forEach(user => {
+                    resultsGrid.innerHTML += `
+                        <div class="user-list-item">
+                            <div class="d-flex align-items-center" style="cursor: pointer;" onclick="window.location.href='profil.html?id=${user.user_id}'">
+                                <img src="https://placehold.co/40" alt="avatar">
+                                <div class="fw-bold" style="margin-left: 10px;">${user.uzivatelskeJmeno}</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); window.location.href='profil.html?id=${user.user_id}'"><i class="fas fa-user"></i> Profil</button>
+                        </div>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function sendFriendRequest(friendId, btnElement) {
+            const fd = new FormData(); fd.append('action', 'send_request'); fd.append('friend_id', friendId);
+            try {
+                const res = await fetch('social_api.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    btnElement.classList.replace('btn-primary', 'btn-secondary');
+                    btnElement.innerHTML = '<i class="fas fa-clock"></i> Žádost odeslána'; 
+                    btnElement.disabled = true;
+                } else { alert(data.message); }
+            } catch (e) { console.error(e); }
+        }
+
+        async function respondRequest(requestId, responseType) {
+            const fd = new FormData(); fd.append('action', 'respond_request'); fd.append('request_id', requestId); fd.append('response', responseType); 
+            try {
+                const res = await fetch('social_api.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) { loadProfileData(); } else { alert(data.message); }
+            } catch (e) { console.error(e); }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadProfileData();
+
+            const theme = localStorage.getItem('theme');
+            const slider = document.getElementById('theme-slider');
+            if(slider) {
+                if(theme === 'light') slider.value = 0;
+                else if(theme === 'dark') slider.value = 2;
+                else slider.value = 1; 
+            }
+        });
+    </script>
 </body>
 </html>

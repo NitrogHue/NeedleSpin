@@ -3,56 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Přihlášení - Hudební Store</title>
+    <title>Přihlášení - NeedleSpin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- DEFINICE BAREVNÝCH MOTIVŮ --- */
+        :root {
+            /* Tmavý režim (Výchozí) */
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --text-main: #ffffff;
+            --text-muted: #aaa;
+            --input-bg: #3d3d54;
+            --input-border: #4d4d64;
+            --accent: #e55a2b;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body.light-mode {
+            /* Světlý režim */
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff;   /* Bílý navbar pro light mode */
+            --bg-card: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #555;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --accent: #ff6b35;
+            --card-shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode {
+            /* DARK REŽIM (Čistě černá) */
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-card: #161616;
+            --bg-item: #0a0a0a;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --border-color: #333;
+            --item-border: #333;
+            --accent: #ff4500;
+            --progress-bg: #1a1a1a;
+        }
+
+        /* --- ZÁKLADNÍ STYLY --- */
+        body {
+            background-color: var(--bg-main) !important;
+            color: var(--text-main) !important;
+            font-family: Arial, sans-serif;
+            margin: 0; padding: 0; transition: 0.3s;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
+            border-right: 1px solid var(--input-border);
+            display: flex; flex-direction: column; transition: 0.3s;
+        }
+        
+        /* VYCENTROVÁNÍ PROFILOVKY */
+        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
+        
+        .sidebar .nav-link { 
+            color: var(--text-main) !important; 
+            padding: 12px; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px;
+        }
+        .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+
+        /* Login Formulář */
+        .login-form {
+            max-width: 400px; width: 100%; margin: 50px auto;
+            background-color: var(--bg-card); border: 1px solid var(--input-border);
+            padding: 30px; border-radius: 10px; box-sizing: border-box;
+            box-shadow: 0 4px 15px var(--card-shadow);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .login-form input {
+            background-color: var(--input-bg); border: 2px solid var(--input-border);
+            color: var(--text-main); padding: 12px; border-radius: 8px;
+            width: 100%; margin-bottom: 15px; box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .login-form input:focus { outline: none; border-color: var(--accent); }
+        .login-form label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+
+        .btn-prihlasit {
+            background-color: #00d26a; color: white; border: none;
+            padding: 12px; width: 100%; border-radius: 8px;
+            font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s;
+        }
+        .btn-prihlasit:hover { background-color: #00b85a; }
+
+        /* Search Bar */
+        .search-bar {
+            background-color: var(--bg-card); border: 1px solid var(--input-border);
+            padding: 10px 20px; border-radius: 30px; display: flex; align-items: center;
+            max-width: 500px; width: 100%; margin: 0 auto 30px;
+        }
+        .search-bar input { background: transparent; border: none; color: var(--text-main); flex: 1; outline: none; margin: 0 10px; }
+
+        /* Responzivita (Mobilní bottom bar) */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0;
+                display: flex; flex-direction: row; justify-content: space-around; padding: 10px;
+                border-top: 1px solid var(--input-border); border-right: none;
+            }
+            .sidebar .profile { display: none; }
+            .sidebar nav { display: flex; width: 100%; justify-content: space-around; }
+            .sidebar .nav-link { margin-bottom: 0; padding: 8px; font-size: 14px; }
+            .main-content { margin-left: 0; padding-bottom: 80px; }
+        }
+    </style>
 </head>
 <body>
+    <script>
+        (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') document.body.classList.add('light-mode');
+        else if (theme === 'dark') document.body.classList.add('dark-mode');
+    })();
+    </script>
 
-   <div class="sidebar">
+    <div class="sidebar">
         <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23ccc'/%3E%3C/svg%3E" alt="Avatar">
+            <img src="https://placehold.co/80" alt="Avatar">
         </div>
 
-        <nav>
+        <nav style="width: 100%;">
             <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
             <a href="obchod.html" class="nav-link">🛒 Obchod</a>
             <a href="trziste.html" class="nav-link">📈 Tržiště</a>
             <a href="minihry.html" class="nav-link">🎮 Minihry</a>
-            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="login.html" class="nav-link" style="background-color: var(--accent); color: white !important;">🔐 Přihlášení</a>
         </nav>
 
-        <div style="position: absolute; bottom: 20px; width: 210px;">
-            <a href="#" class="nav-link" onclick="logout()">📤 Odhlásit se</a>
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--input-border); padding-top: 10px; width: 100%;">
+            <a href="#" class="nav-link" onclick="odhlasit()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
         </div>
     </div>
 
     <div class="main-content">
-        <div class="search-bar-container">
-            <div class="search-bar">
-                <button style="background: transparent; border: none; color: white;">☰</button>
-                <input type="text" placeholder="Hledat...">
-                <button style="background: transparent; border: none; color: white;">🔍</button>
-            </div>
-        </div>
-        <div class="login-form">
-            <h2 style="text-align: center; margin-bottom: 20px;">Přihlášení</h2>
-            
-            <label>Username:</label>
-            <input type="text" id="username" placeholder="Zadej username">
-            
-            <label>Heslo:</label>
-            <input type="password" id="password" placeholder="Zadej heslo">
-            <button class="btn-prihlasit" onclick="Login()">Přihlásit se</button>
-            
-            <p style="text-align: center; margin-top: 15px;">
-                Ještě nemáš účet? <a href="registrace.html" style="color: #00d26a;">Registruj se</a>
-            </p>
+        <div class="search-bar">
+            <button style="background: transparent; border: none; color: var(--text-main);"><i class="fas fa-bars"></i></button>
+            <input type="text" placeholder="Hledat...">
+            <button style="background: transparent; border: none; color: var(--text-main);"><i class="fas fa-search"></i></button>
         </div>
 
+        <div class="login-form">
+            <h2 style="text-align: center; margin-bottom: 25px;">Přihlášení</h2>
+            
+            <label>Uživatelské jméno (Username):</label>
+            <input type="text" id="username" placeholder="Zadej své jméno">
+            
+            <label>Heslo:</label>
+            <input type="password" id="password" placeholder="Zadej své heslo">
+            
+            <button class="btn-prihlasit" onclick="Login()">Přihlásit se</button>
+            
+            <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                Ještě nemáš účet? <a href="registrace.html" style="color: #00d26a; font-weight: bold; text-decoration: none;">Registruj se</a>
+            </p>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
-</html> 
+</html>

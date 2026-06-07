@@ -3,63 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrace - Hudební Store</title>
+    <title>Registrace - NeedleSpin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- DEFINICE BAREVNÝCH PROMĚNNÝCH --- */
+        :root {
+            /* Tmavý režim (Výchozí) */
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --text-main: #ffffff;
+            --text-muted: #aaa;
+            --input-bg: #3d3d54;
+            --input-border: #4d4d64;
+            --accent: #e55a2b;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body.light-mode {
+            /* Světlý režim */
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff;   /* Bílý navbar pro light mode */
+            --bg-card: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #555;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --accent: #ff6b35;
+            --card-shadow: rgba(0, 0, 0, 0.05);
+        }
+        body.dark-mode {
+            /* DARK REŽIM (Pravá poloha slideru - Čistě černá) */
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-card: #161616;
+            --bg-item: #0a0a0a;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --border-color: #333;
+            --item-border: #333;
+            --accent: #ff4500;
+            --progress-bg: #1a1a1a;
+        }
+
+        /* --- ZÁKLADNÍ STYLY --- */
+        body {
+            background-color: var(--bg-main) !important;
+            color: var(--text-main) !important;
+            font-family: Arial, sans-serif;
+            margin: 0; padding: 0; transition: 0.3s;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
+            border-right: 1px solid var(--input-border);
+            transition: 0.3s;
+            display: flex; flex-direction: column;
+        }
+        
+        /* VYCENTROVÁNÍ PROFILOVKY */
+        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; width: 100%; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
+        
+        .sidebar .nav-link { 
+            color: var(--text-main) !important; 
+            padding: 12px; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px;
+        }
+        .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+
+        /* Registrační Formulář */
+        .login-form {
+            max-width: 450px; width: 100%; margin: 40px auto;
+            background-color: var(--bg-card); border: 1px solid var(--input-border);
+            padding: 30px; border-radius: 10px; box-sizing: border-box;
+            box-shadow: 0 4px 15px var(--card-shadow);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .login-form h2 { color: var(--text-main); margin-bottom: 25px; text-align: center; }
+        .login-form label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+        .login-form input {
+            background-color: var(--input-bg); border: 2px solid var(--input-border);
+            color: var(--text-main); padding: 12px; border-radius: 8px;
+            width: 100%; margin-bottom: 15px; box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .login-form input:focus { outline: none; border-color: var(--accent); }
+
+        .btn-prihlasit {
+            background-color: #00d26a; color: white; border: none;
+            padding: 12px; width: 100%; border-radius: 8px;
+            font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; margin-top: 15px;
+        }
+        .btn-prihlasit:hover { background-color: #00b85a; }
+
+        /* Checklist hesla */
+        .password-checklist {
+            background: rgba(0,0,0,0.1); border: 1px solid var(--input-border);
+            border-radius: 8px; padding: 15px; margin-bottom: 15px;
+            font-size: 13px; color: var(--text-muted);
+        }
+        .password-checklist ul { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .password-checklist li { margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .check-icon { color: #ff4444; width: 15px; text-align: center; }
+        .valid .check-icon { color: #00d26a; }
+        .valid { color: var(--text-main); }
+
+        /* Search Bar */
+        .search-bar {
+            background-color: var(--bg-card); border: 1px solid var(--input-border);
+            padding: 10px 20px; border-radius: 30px; display: flex; align-items: center;
+            max-width: 500px; width: 100%; margin: 0 auto 30px;
+        }
+        .search-bar input { background: transparent; border: none; color: var(--text-main); flex: 1; outline: none; margin: 0 10px; }
+
+        /* --- NOTIFIKAČNÍ TOASTY --- */
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 1050; display: flex; flex-direction: column; gap: 10px;
+        }
+        .custom-toast {
+            min-width: 250px; background-color: var(--bg-card); color: var(--text-main);
+            border-left: 5px solid var(--accent); padding: 15px 20px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; font-size: 15px;
+            animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards;
+        }
+        .custom-toast.error { border-left-color: #dc3545; }
+        .custom-toast.success { border-left-color: #00d26a; }
+        .custom-toast.warning { border-left-color: #ffc107; }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* Responzivita (Mobilní bottom bar) */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0;
+                display: flex; flex-direction: row; justify-content: space-around; padding: 10px;
+                border-top: 1px solid var(--input-border); border-right: none;
+            }
+            .sidebar .profile { display: none; }
+            .sidebar nav { display: flex; width: 100%; justify-content: space-around; }
+            .sidebar .nav-link { margin-bottom: 0; padding: 8px; font-size: 14px; }
+            .main-content { margin-left: 0; padding-bottom: 80px; }
+        }
+    </style>
 </head>
 <body>
+    <script>
+         (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') document.body.classList.add('light-mode');
+        else if (theme === 'dark') document.body.classList.add('dark-mode');
+    })();
+    </script>
 
-   <div class="sidebar">
+    <div id="toast-container"></div>
+
+    <div class="sidebar">
         <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23ccc'/%3E%3C/svg%3E" alt="Avatar">
+            <img src="https://placehold.co/80" alt="Avatar">
         </div>
 
-        <nav>
+        <nav style="width: 100%;">
             <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
             <a href="obchod.html" class="nav-link">🛒 Obchod</a>
             <a href="trziste.html" class="nav-link">📈 Tržiště</a>
             <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
             <a href="login.html" class="nav-link">🔐 Přihlášení</a>
         </nav>
 
-        <div style="position: absolute; bottom: 20px; width: 210px;">
-            <a href="#" class="nav-link" onclick="logout()">📤 Odhlásit se</a>
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--input-border); padding-top: 10px; width: 100%;">
+            <a href="#" class="nav-link" onclick="odhlasit()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
         </div>
     </div>
 
     <div class="main-content">
-        <div class="search-bar-container">
-            <div class="search-bar">
-                <button style="background: transparent; border: none; color: white;">☰</button>
-                <input type="text" placeholder="Hledat...">
-                <button style="background: transparent; border: none; color: white;">🔍</button>
-            </div>
+        <div class="search-bar">
+            <button style="background: transparent; border: none; color: var(--text-main);"><i class="fas fa-bars"></i></button>
+            <input type="text" placeholder="Hledat...">
+            <button style="background: transparent; border: none; color: var(--text-main);"><i class="fas fa-search"></i></button>
         </div>
+
         <div class="login-form">
-            <h2 style="text-align: center; margin-bottom: 20px;">Registrace</h2>
+            <h2>Registrace</h2>
             
-            <label>Email:</label>
+            <label>E-mailová adresa:</label>
             <input type="email" id="email" placeholder="Zadej email">
             
-            <label>Username:</label>
+            <label>Uživatelské jméno:</label>
             <input type="text" id="reg-username" placeholder="Zadej username">
             
             <label>Heslo:</label>
-            <input type="password" id="reg-password" placeholder="Zadej heslo">
+            <input type="password" id="reg-password" placeholder="Zadej heslo" onkeyup="checkPasswordStrength()">
             
+            <div class="password-checklist">
+                <ul>
+                    <li id="req-length"><i class="fas fa-times check-icon"></i> Alespoň 8 znaků</li>
+                    <li id="req-upper"><i class="fas fa-times check-icon"></i> Alespoň jedno velké písmeno</li>
+                    <li id="req-number"><i class="fas fa-times check-icon"></i> Alespoň jedna číslice</li>
+                    <li id="req-special"><i class="fas fa-times check-icon"></i> Alespoň jeden speciální znak</li>
+                </ul>
+            </div>
+
             <label>Potvrzení hesla:</label>
             <input type="password" id="reg-password2" placeholder="Potvrď heslo">
             
-            <button class="btn-prihlasit" onclick="registrace()">Registrovat se</button>
+            <button class="btn-prihlasit" onclick="registerUser()">Registrovat se</button>
             
-            <p style="text-align: center; margin-top: 15px;">
-                Už máš účet? <a href="login.html" style="color: #00d26a;">Přihlas se</a>
+            <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                Už máš účet? <a href="login.html" style="color: #00d26a; font-weight: bold; text-decoration: none;">Přihlas se</a>
             </p>
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
+
+    <script>
+        // Funkce pro Toasty (nahrazuje staré alerty)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let icon = '<i class="fas fa-info-circle me-2"></i>';
+            if(type === 'success') icon = '<i class="fas fa-check-circle me-2 text-success"></i>';
+            if(type === 'error') icon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
+            if(type === 'warning') icon = '<i class="fas fa-exclamation-triangle me-2 text-warning"></i>';
+
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3300);
+        }
+
+        // Dynamická kontrola hesla při psaní
+        function checkPasswordStrength() {
+            const pwd = document.getElementById('reg-password').value;
+
+            const reqLength = document.getElementById('req-length');
+            const reqUpper = document.getElementById('req-upper');
+            const reqNumber = document.getElementById('req-number');
+            const reqSpecial = document.getElementById('req-special');
+
+            // Kontrola 8 znaků
+            if (pwd.length >= 8) {
+                reqLength.classList.add('valid');
+                reqLength.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqLength.classList.remove('valid');
+                reqLength.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+
+            // Kontrola velkého písmene
+            if (/[A-Z]/.test(pwd)) {
+                reqUpper.classList.add('valid');
+                reqUpper.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqUpper.classList.remove('valid');
+                reqUpper.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+
+            // Kontrola číslice
+            if (/[0-9]/.test(pwd)) {
+                reqNumber.classList.add('valid');
+                reqNumber.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqNumber.classList.remove('valid');
+                reqNumber.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+
+            // Kontrola speciálního znaku
+            if (/[^A-Za-z0-9]/.test(pwd)) {
+                reqSpecial.classList.add('valid');
+                reqSpecial.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqSpecial.classList.remove('valid');
+                reqSpecial.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+        }
+
+        // Samotná registrační funkce s Toasty
+        async function registerUser() {
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const password2 = document.getElementById('reg-password2').value;
+            
+            if (email === "" || username === "" || password === "" || password2 === "") {
+                showToast("Prosím vyplň všechna pole!", 'warning');
+                return;
+            }
+            
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+                showToast("Heslo nesplňuje všechny bezpečnostní požadavky!", 'error');
+                return;
+            }
+            
+            if (password !== password2) {
+                showToast("Hesla se neshodují!", 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('registrace.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `email=${encodeURIComponent(email)}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast("Registrace úspěšná! Vítej " + username, 'success');
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 1500);
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast("Chyba při registraci. Zkus to znovu.", 'error');
+            }
+        }
+    </script>
 </body>
 </html>

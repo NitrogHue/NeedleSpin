@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeedleSpin - Questy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* --- DEFINICE BAREV (PROMĚNNÉ) --- */
+        :root {
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --bg-item: #1a1a2e;
+            --text-main: #ffffff;
+            --text-muted: #aaa;
+            --border-color: #5a5a7a;
+            --item-border: #3d3d54;
+            --accent: #ff6b35;
+            --progress-bg: #0f0f1a;
+        }
+
+        body.light-mode {
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff;   
+            --bg-card: #ffffff;
+            --bg-item: #f9f9f9;
+            --text-main: #1a1a2e;
+            --text-muted: #555;
+            --border-color: #cccccc;
+            --item-border: #dddddd;
+            --accent: #ff6b35;
+            --progress-bg: #e0e0e0;
+        }
+        body.dark-mode {
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-card: #161616;
+            --bg-item: #0a0a0a;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --border-color: #333;
+            --item-border: #333;
+            --accent: #ff4500;
+            --progress-bg: #1a1a1a;
+        }
+
+        /* --- ZÁKLADNÍ STYLY --- */
+       body {
+            background-color: var(--bg-main) !important;
+            color: var(--text-main) !important;
+            font-family: Arial, sans-serif;
+            margin: 0; padding: 0; transition: 0.3s;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
+            border-right: 1px solid var(--border-color);
+            transition: 0.3s;
+            display: flex; flex-direction: column;
+        }
+        
+        .sidebar .profile { text-align: center; margin-bottom: 30px; width: 100%; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
+        
+        .sidebar .nav-link { 
+            color: var(--text-main) !important; 
+            padding: 12px; text-decoration: none; display: block; border-radius: 8px;
+        }
+        .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+
+        /* Questy a Panely */
+        .quest-panel { 
+            background: var(--bg-card); 
+            border-radius: 12px; padding: 30px; 
+            border: 1px solid var(--border-color); 
+            max-width: 800px; margin: 0 auto 30px;
+            transition: 0.3s;
+        }
+        .quest-item { 
+            background: var(--bg-item); 
+            border-radius: 8px; padding: 20px; 
+            border: 1px solid var(--item-border); 
+            margin-bottom: 20px; 
+            transition: 0.3s;
+        }
+        .progress-custom { 
+            height: 12px; 
+            background-color: var(--progress-bg); 
+            border-radius: 10px; overflow: hidden; 
+            border: 1px solid var(--item-border); 
+        }
+        .section-title { 
+            color: var(--accent); 
+            border-bottom: 2px solid var(--item-border); 
+            padding-bottom: 10px; margin: 10px 0 20px;
+        }
+
+        h1, h4 { color: var(--text-main) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* Responzivita */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0; display: flex; flex-direction: row; justify-content: space-around; border-top: 1px solid var(--border-color); border-right: none; }
+            .sidebar .profile { display: none; }
+            .sidebar .nav-link { padding: 8px; font-size: 14px; margin-bottom: 0; }
+            .main-content { margin-left: 0; padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+         (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') document.body.classList.add('light-mode');
+        else if (theme === 'dark') document.body.classList.add('dark-mode');
+    })();
+    </script>
+
+    <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="https://placehold.co/80" alt="Avatar">
+        </div>
+
+        <nav style="width: 100%;">
+            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link">📦 Inventář</a>
+            <a href="trziste.html" class="nav-link">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link" style="font-weight: bold; color: #c44111 !important;">🎯 Questy</a>
+            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
+        </nav>
+
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
+            <a href="#" class="nav-link" onclick="logout()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h1 class="m-0"><i class="fas fa-tasks text-warning"></i> Moje Questy</h1>
+            <div style="background: var(--bg-card); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--border-color);">
+                Body: <span id="points-display" class="fw-bold text-warning">Načítám...</span>
+            </div>
+        </div>
+
+        <div class="quest-panel">
+            <div id="quests-container">
+                <div class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Načítám úkoly...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function updatePoints() {
+            const res = await fetch('obchod.php?action=check');
+            const data = await res.json();
+            if(data.success) document.getElementById('points-display').innerText = data.new_balance;
+        }
+
+        function buildQuestHTML(q) {
+            const percent = Math.min(100, (q.progres / q.cil_pocet) * 100);
+            const statusText = q.dokonceno == 1 
+                ? '<span class="text-success fw-bold"><i class="fas fa-check"></i> Splněno</span>' 
+                : `<span class="text-warning fw-bold">${q.progres} / ${q.cil_pocet}</span>`;
+            
+            const barColor = q.dokonceno == 1 ? 'bg-success' : 'bg-warning';
+
+            return `
+                <div class="quest-item">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="m-0">${q.nazev}</h4>
+                        <div style="font-size: 16px; color: #ff6b35; font-weight: bold; background: rgba(255, 107, 53, 0.1); padding: 5px 15px; border-radius: 20px;">
+                            <i class="fas fa-gift"></i> +${q.odmena} B
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-end mb-2" style="font-size: 14px;">
+                        <span class="text-muted">Tvůj postup:</span>
+                        ${statusText}
+                    </div>
+                    <div class="progress-custom">
+                        <div class="progress-bar ${barColor}" role="progressbar" style="width: ${percent}%; height: 100%;"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadQuests() {
+            try {
+                const res = await fetch('get_quests.php');
+                const data = await res.json();
+                const container = document.getElementById('quests-container');
+                
+                if(!data.success) {
+                    container.innerHTML = `<p class="text-danger text-center">${data.message}</p>`;
+                    return;
+                }
+
+                if (data.quests.length === 0) {
+                    container.innerHTML = `<p class="text-muted text-center py-4">Nemáš žádné aktivní úkoly.</p>`;
+                    return;
+                }
+
+                const daily = data.quests.filter(q => q.typ_trvani === 'denni');
+                const weekly = data.quests.filter(q => q.typ_trvani === 'tydenni');
+                const monthly = data.quests.filter(q => q.typ_trvani === 'mesicni');
+
+                let html = '';
+
+                if(daily.length > 0) {
+                    html += `<h3 class="section-title"><i class="fas fa-sun"></i> Denní úkoly</h3>`;
+                    daily.forEach(q => html += buildQuestHTML(q));
+                }
+                if(weekly.length > 0) {
+                    html += `<h3 class="section-title"><i class="fas fa-calendar-week"></i> Týdenní úkoly</h3>`;
+                    weekly.forEach(q => html += buildQuestHTML(q));
+                }
+                if(monthly.length > 0) {
+                    html += `<h3 class="section-title"><i class="fas fa-moon"></i> Měsíční úkoly</h3>`;
+                    monthly.forEach(q => html += buildQuestHTML(q));
+                }
+
+                container.innerHTML = html;
+
+            } catch (e) {
+                document.getElementById('quests-container').innerHTML = '<p class="text-danger text-center">Chyba připojení k serveru.</p>';
+            }
+        }
+        
+        updatePoints();
+        loadQuests();
+    </script>
+</body>
+</html>

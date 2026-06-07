@@ -3,52 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domovská stránka - Hudební Store</title>
+    <title>Domovská stránka - NeedleSpin</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* --- DEFINICE BAREV --- */
+        :root {
+            --bg-main: #1a1a2e; --bg-sidebar: #ff6b35; --bg-card: #2d2d44;
+            --text-main: #ffffff; --text-muted: #aaa; --border-color: #5a5a7a;
+            --accent: #ff6b35;
+        }
+
+        body.light-mode {
+            --bg-main: #f0f2f5; --bg-sidebar: #ffffff; --bg-card: #ffffff;
+            --text-main: #1a1a2e; --text-muted: #555; --border-color: #cccccc;
+        }
+
+        body.dark-mode {
+            --bg-main: #0a0a0a; --bg-sidebar: #111111; --bg-card: #161616;
+            --text-main: #e0e0e0; --text-muted: #777; --border-color: #333; --accent: #ff4500;
+        }
+
+        body { background-color: var(--bg-main) !important; color: var(--text-main) !important; font-family: Arial, sans-serif; transition: 0.3s; min-height: 100vh; display: flex; flex-direction: column; }
+
+        .sidebar {
+            background-color: var(--bg-sidebar) !important; height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
+            border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s;
+        }
+        
+        /* VYCENTROVÁNÍ PROFILOVKY */
+        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
+        
+        .sidebar .nav-link { color: var(--text-main) !important; padding: 12px; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px;}
+        .sidebar .nav-link.active { background-color: var(--accent) !important; color: white !important; }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; flex-grow: 1; display: flex; flex-direction: column; position: relative; }
+
+        .sort-container { position: relative; display: inline-block; }
+        .sort-btn { 
+            background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); 
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+        }
+        .sort-popup {
+            display: none; position: absolute; right: 0; top: 110%; background: var(--bg-card); 
+            border: 1px solid var(--border-color); border-radius: 8px; min-width: 180px; z-index: 1050;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .sort-option { padding: 10px 15px; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--border-color); }
+        .sort-option:last-child { border-bottom: none; }
+        .sort-option:hover { background: rgba(128,128,128,0.1); color: var(--accent); }
+        .sort-option.active { color: var(--accent); font-weight: bold; }
+
+        .search-bar-container { margin-bottom: 20px; }
+        .search-bar input { 
+            background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); 
+            padding: 10px 15px; border-radius: 8px 0 0 8px; outline: none; width: 300px;
+        }
+        .search-bar button {
+            background-color: var(--accent); color: white; border: 1px solid var(--accent);
+            padding: 10px 15px; border-radius: 0 8px 8px 0; cursor: pointer;
+        }
+
+        /* Tlačítko pro Soukromí vpravo nahoře */
+        .btn-privacy {
+            background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted);
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s;
+            position: absolute; top: 30px; right: 30px; z-index: 100;
+        }
+        .btn-privacy:hover { background: rgba(128,128,128,0.1); color: var(--text-main); }
+
+        /* --- STYLY PRO PRIVACY MODAL --- */
+        .privacy-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;
+        }
+        .privacy-modal-box {
+            background: var(--bg-card); padding: 30px; border-radius: 12px; width: 600px;
+            max-width: 90%; max-height: 80vh; overflow-y: auto; border: 1px solid var(--border-color);
+            color: var(--text-main); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .privacy-modal-box h3 { color: var(--accent); margin-bottom: 20px; }
+        .privacy-modal-box h5 { margin-top: 20px; color: var(--text-main); }
+        .privacy-modal-box p, .privacy-modal-box li { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+        
+        .footer { margin-top: auto; padding-top: 40px; text-align: center; font-size: 13px; color: var(--text-muted); }
+        .footer a { color: var(--accent); text-decoration: none; cursor: pointer; }
+        .footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .sidebar { 
+                width: 100% !important; height: auto !important; position: fixed !important; bottom: 0 !important; top: auto !important; left: 0 !important;
+                padding: 10px 5px !important; flex-direction: column !important; border-radius: 20px 20px 0 0; z-index: 9999 !important;
+                background-color: #ff6b35 !important;
+            }
+            .sidebar .profile { display: none; }
+            .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }
+            .sidebar .nav-link { flex: 1 1 22% !important; font-size: 11px !important; text-align: center; margin-bottom: 0; }
+            .sidebar div[style*="position: absolute"] { position: static !important; width: 100% !important; margin-top: 5px !important; padding-top: 5px !important; border-top: 1px solid rgba(255,255,255,0.2) !important; display: flex !important; justify-content: center !important; gap: 20px !important; }
+            .main-content { margin-left: 0 !important; padding: 15px; padding-bottom: 150px !important; }
+            .search-bar input { width: 200px; }
+            .btn-privacy { top: 15px; right: 15px; font-size: 12px; padding: 6px 12px; } /* Menší tlačítko na mobilech */
+        }
+    </style>
 </head>
 <body>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'light') document.body.classList.add('light-mode');
+            else if (theme === 'dark') document.body.classList.add('dark-mode');
+        })();
+    </script>
 
     <div class="sidebar">
         <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23ccc'/%3E%3C/svg%3E" alt="Avatar">
+            <img src="https://placehold.co/80" alt="Avatar">
         </div>
-
         <nav>
-            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="DomovniStranka.html" class="nav-link active" style="font-weight: bold; color: #c44111 !important;">🏠 Domovská stránka</a>
             <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link">📦 Inventář</a>
             <a href="trziste.html" class="nav-link">📈 Tržiště</a>
             <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
             <a href="login.html" class="nav-link">🔐 Přihlášení</a>
         </nav>
-
-        <div style="position: absolute; bottom: 20px; width: 210px;">
-            <a href="#" class="nav-link" onclick="odhlasit()">📤 Odhlásit se</a>
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
+            <a href="#" class="nav-link" onclick="odhlasit()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
         </div>
     </div>
 
-   <div class="main-content">
-    
-    <div class="search-bar-container">
-        <div class="search-bar">
-             <input type="text" id="search-input" placeholder="Hledat...">
-             <button id="search-btn">🔍</button>
-        </div>
-    </div>
+    <div class="main-content">
+        <button class="btn-privacy" onclick="openPrivacyModal()">
+            <i class="fas fa-shield-alt"></i> Soukromí
+        </button>
 
-    <div class="container mt-5">
-        <div id="resultsGrid" class="row g-4">
+        <div class="search-bar-container d-flex justify-content-center mb-4 mt-2">
+            <div class="search-bar d-flex">
+                 <input type="text" id="search-input" placeholder="Hledat alba, interprety...">
+                 <button id="search-btn"><i class="fas fa-search"></i></button>
             </div>
+        </div>
+
+        <div class="container flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h5 mb-0" style="color: var(--text-main);">Výsledky</h2>
+                <div class="sort-container">
+                    <button class="sort-btn" onclick="toggleSortPopup(event)">
+                        <i class="fas fa-sort-amount-down"></i> <span id="current-sort-label">Od A do Z</span>
+                    </button>
+                    <div class="sort-popup" id="sort-popup">
+                        <div class="sort-option active" onclick="sortAlbums('az', 'Od A do Z', this, event)">Od A do Z</div>
+                        <div class="sort-option" onclick="sortAlbums('za', 'Od Z do A', this, event)">Od Z do A</div>
+                    </div>
+                </div>
+            </div>
+            <div id="resultsGrid" class="row g-4">
+                <div class="text-center text-muted" id="empty-state">Zadej hledaný výraz nebo počkej na načtení...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 NeedleSpin
+        </div>
     </div>
 
-</div>
-<script src="app.js"></script>
+    <div class="privacy-modal-overlay" id="privacyModal">
+        <div class="privacy-modal-box">
+            <h3><i class="fas fa-user-shield"></i> Zásady ochrany soukromí</h3>
+            <p>Tvé soukromí je pro nás v NeedleSpin prioritou. Zde se dozvíš, jaká data o tobě sbíráme a jak s nimi bezpečně nakládáme.</p>
+            
+            <h5>1. Jaká data sbíráme</h5>
+            <ul>
+                <li><strong>Základní údaje:</strong> E-mailová adresa, uživatelské jméno a bezpečně zašifrované (zahashované) heslo pro přihlášení.</li>
+                <li><strong>Herní data:</strong> Informace o tvém inventáři (vlastněná alba), nasbírané body, postup v questech a výsledky z miniher.</li>
+                <li><strong>Sociální interakce:</strong> Tvé hodnocení alb, seznam přátel, koho sleduješ a historie tvých nabídek na komunitním tržišti.</li>
+            </ul>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+            <h5>2. K čemu data používáme</h5>
+            <p>Všechna data slouží čistě k zajištění chodu aplikace NeedleSpin. Používáme je, abychom ti umožnili sbírat alba, obchodovat s ostatními hráči a využívat sociální funkce profilu. <strong>Tvá data nikdy neprodáváme třetím stranám.</strong></p>
+
+            <h5>3. Tvé soukromí a kontrola</h5>
+            <p>Pokud si nepřeješ, aby ostatní uživatelé viděli tvou aktivitu a statistiky hodnocení, můžeš si kdykoliv v sekci <em>Můj Profil -> Nastavení</em> aktivovat možnost <strong>Skrýt uživatelské statistiky</strong>.</p>
+
+            <h5>4. Cookies a Local Storage</h5>
+            <p>Naše aplikace využívá místní úložiště tvého prohlížeče (Local Storage) výhradně pro funkční účely – například pro zapamatování tvé volby světlého či tmavého režimu (Dark mode), aby se ti aplikace nenačítala pokaždé jinak.</p>
+
+            <div class="text-end mt-4">
+                <button class="btn btn-secondary fw-bold" onclick="closePrivacyModal()">Zavřít a rozumím</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
     <script>
-        // Otevírání/zavírání dropdownu pro řazení
+
         function toggleSortPopup(e) { 
             e.stopPropagation(); 
             const p = document.getElementById('sort-popup'); 
@@ -60,10 +213,8 @@
             if (p) p.style.display = 'none'; 
         });
 
-        // Nyní je výchozí řazení Abecední (A-Z)
         let currentSortMethod = 'az';
 
-        // Výběr možnosti z menu
         function sortAlbums(method, label, el, e) {
             e.stopPropagation(); 
             currentSortMethod = method;
@@ -74,7 +225,6 @@
             executeSort(); 
         }
 
-        // ZJEDNODUŠENÁ FUNKCE PRO ŘAZENÍ JEN PODLE ABECEDY
         function executeSort() {
             const grid = document.getElementById('resultsGrid');
             const items = Array.from(grid.children).filter(c => c.tagName === 'DIV' && !c.id.includes('empty-state'));
@@ -106,6 +256,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             observer.observe(document.getElementById('resultsGrid'), { childList: true });
         });
+
 
         function openPrivacyModal() {
             document.getElementById('privacyModal').style.display = 'flex';

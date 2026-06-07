@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeedleSpin - Tržiště</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* --- DEFINICE BAREVNÝCH MOTIVŮ --- */
+        :root {
+            /* Tmavý režim (Výchozí) */
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --text-main: #ffffff;
+            --text-muted: #bbb;
+            --border-color: #5a5a7a;
+            --accent: #e55a2b;
+            --input-bg: #1a1a2e;
+            --input-border: #5a5a7a;
+            --trade-box-border: #0dcaf0;
+        }
+
+        body.light-mode {
+            /* Světlý režim */
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff;   
+            --bg-card: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #555;
+            --border-color: #cccccc;
+            --accent: #ff6b35;
+            --input-bg: #f9f9f9;
+            --input-border: #cccccc;
+            --trade-box-border: #0dcaf0;
+        }
+        body.dark-mode {
+            /* DARK REŽIM (Čistě černá) */
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-card: #161616;
+            --bg-item: #0a0a0a;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --border-color: #333;
+            --item-border: #333;
+            --accent: #ff4500;
+            --progress-bg: #1a1a1a;
+        }
+
+        /* --- ZÁKLADNÍ STYLY --- */
+        body { 
+            background-color: var(--bg-main) !important; 
+            color: var(--text-main) !important; 
+            transition: 0.3s;
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
+            border-right: 1px solid var(--border-color);
+            transition: 0.3s;
+        }
+        
+        /* Centrování profilovky */
+        .sidebar .profile { margin-bottom: 20px; display: flex; justify-content: center; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); background-color: white; object-fit: cover; }
+        
+        .sidebar .nav-link { 
+            color: var(--text-main) !important; 
+            padding: 12px; text-decoration: none; display: block; border-radius: 8px;
+        }
+        .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+
+        /* Karty trhu */
+        .album-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .album-card { 
+            background-color: var(--bg-card); border-radius: 10px; padding: 20px; 
+            text-align: center; position: relative; border: 2px solid transparent; 
+            transition: 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .album-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .album-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+        
+        .seller-badge { 
+            position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); 
+            padding: 5px 10px; border-radius: 20px; font-size: 12px; color: #ff6b35; 
+        }
+
+        /* Box pro Trade Offer */
+        .trade-offer-box {
+            background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; 
+            border: 2px solid var(--trade-box-border); box-shadow: 0 0 15px rgba(13, 202, 240, 0.2);
+            color: var(--text-main);
+        }
+        .trade-album-img { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
+        /* Search bar */
+        .search-bar {
+            background-color: var(--bg-card);
+            border: 1px solid var(--input-border);
+            padding: 10px 20px; border-radius: 30px;
+            display: flex; align-items: center; width: 100%; max-width: 500px;
+        }
+        .search-bar input { background: transparent; border: none; color: var(--text-main); flex: 1; outline: none; margin: 0 10px; }
+
+        /* Custom Dropdown v modálu */
+        .custom-select-trigger { 
+            background: var(--input-bg); border: 1px solid var(--input-border); 
+            padding: 12px; border-radius: 6px; cursor: pointer; display: flex; 
+            align-items: center; color: var(--text-main); justify-content: space-between;
+        }
+        .custom-select-dropdown { 
+            position: absolute; top: 100%; left: 0; width: 100%; 
+            background: var(--bg-card); border: 1px solid var(--input-border); 
+            border-radius: 6px; margin-top: 5px; z-index: 1000; display: none;
+        }
+        .custom-option { padding: 10px; display: flex; align-items: center; cursor: pointer; border-bottom: 1px solid var(--input-border); }
+        .custom-option:hover { background: var(--input-bg); }
+        .custom-option-title { font-size: 14px; font-weight: bold; color: var(--text-main); }
+        
+        h1, h4 { color: var(--text-main) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* --- NOTIFIKAČNÍ TOASTY --- */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .custom-toast {
+            min-width: 250px;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border-left: 5px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards;
+        }
+        .custom-toast.error { border-left-color: #dc3545; }
+        .custom-toast.success { border-left-color: #198754; }
+        .custom-toast.warning { border-left-color: #ffc107; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0; display: flex; justify-content: space-around; border-right: none; border-top: 1px solid var(--border-color); }
+            .sidebar .profile { display: none; }
+            .sidebar .nav-link { margin-bottom: 0; padding: 8px; font-size: 14px; }
+            .main-content { margin-left: 0; padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+         (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') document.body.classList.add('light-mode');
+        else if (theme === 'dark') document.body.classList.add('dark-mode');
+    })();
+    </script>
+
+    <div id="toast-container"></div>
+
+    <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="https://placehold.co/80" alt="Avatar">
+        </div>
+
+        <nav>
+            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link">📦 Inventář</a>
+            <a href="trziste.html" class="nav-link" style="font-weight: bold; color: #c44111 !important;">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
+        </nav>
+
+        <div style="position: absolute; bottom: 20px; width: 210px;">
+            <a href="#" class="nav-link" onclick="logout()">📤 Odhlásit se</a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="m-0">📈 Komunitní Tržiště</h1>
+        </div>
+        
+        <div id="incoming-offers" class="mb-5" style="display:none;">
+            <h4 class="text-info mb-3"><i class="fas fa-bell"></i> Nové nabídky na výměnu!</h4>
+            <div id="offers-container"></div>
+        </div>
+
+        <hr style="border-color: var(--border-color); margin-bottom: 30px;">
+
+        <div class="search-bar-container mb-4" style="justify-content: flex-start;">
+            <div class="search-bar">
+                <i class="fas fa-search text-muted"></i>
+                <input type="text" id="marketSearch" placeholder="Hledat album, umělce nebo prodejce..." onkeyup="filterMarket()">
+            </div>
+        </div>
+
+        <div class="album-container" id="market-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--text-muted);">
+                <i class="fas fa-spinner fa-spin me-2"></i> Načítám...
+            </div>
+        </div>
+    </div>
+
+    <div id="tradeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background: var(--bg-card); padding:30px; border-radius:10px; width:450px; max-width:90%; border: 1px solid var(--accent);">
+            <h4 class="mb-3">Co nabídneš na výměnu?</h4>
+            <div class="custom-select-container" style="position: relative;">
+                <div class="custom-select-trigger" onclick="toggleDropdown()">
+                    <div id="custom-select-content">Vyber album...</div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="custom-select-dropdown" class="custom-select-dropdown">
+                    <div class="p-2" style="border-bottom: 1px solid var(--border-color);">
+                        <input type="text" id="custom-select-search" class="form-control form-control-sm" style="background: var(--input-bg); color: var(--text-main); border-color: var(--border-color);" placeholder="Hledat..." onkeyup="filterInventoryOptions()">
+                    </div>
+                    <div id="custom-select-options" style="max-height: 250px; overflow-y: auto;"></div>
+                </div>
+            </div>
+            <input type="hidden" id="trade-listing-id"><input type="hidden" id="my-inventory-selected-id">
+            <div class="d-flex gap-2 mt-4">
+                <button class="btn btn-secondary flex-grow-1" onclick="closeTradeModal()">Zrušit</button>
+                <button class="btn btn-warning flex-grow-1 fw-bold" onclick="sendTradeOffer()"><i class="fas fa-paper-plane"></i> Poslat nabídku</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let myInventoryData = [];
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let icon = '<i class="fas fa-info-circle me-2"></i>';
+            if(type === 'success') icon = '<i class="fas fa-check-circle me-2 text-success"></i>';
+            if(type === 'error') icon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
+            if(type === 'warning') icon = '<i class="fas fa-exclamation-triangle me-2 text-warning"></i>';
+
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3300);
+        }
+
+        function filterMarket() {
+            const query = document.getElementById('marketSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('.market-item-card');
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title').toLowerCase();
+                const artist = card.getAttribute('data-artist').toLowerCase();
+                const seller = card.getAttribute('data-seller').toLowerCase();
+                card.style.display = (title.includes(query) || artist.includes(query) || seller.includes(query)) ? 'block' : 'none';
+            });
+        }
+
+        async function loadMarket() {
+            const grid = document.getElementById('market-grid');
+            const offersDiv = document.getElementById('incoming-offers');
+            const offersContainer = document.getElementById('offers-container');
+
+            try {
+                const invRes = await fetch('get_inventory.php');
+                const invData = await invRes.json();
+                if (invData.success) myInventoryData = invData.items;
+
+                const res = await fetch('market.php?action=load');
+                const data = await res.json();
+
+                if (!data.success) { 
+                    grid.innerHTML = `<p class="text-danger">${data.message}</p>`; 
+                    return; 
+                }
+
+                if (data.offers && data.offers.length > 0) {
+                    offersDiv.style.display = 'block';
+                    offersContainer.innerHTML = data.offers.map(o => `
+                        <div class="trade-offer-box">
+                            <div class="text-center mb-3">Hráč <span class="fw-bold text-info">${o.buyer_name}</span> ti poslal nabídku!</div>
+                            <div class="d-flex justify-content-center align-items-center gap-5 mb-3">
+                                <div class="text-center" style="width: 120px;">
+                                    <div class="badge bg-success mb-2">Dostaneš</div><br>
+                                    <img src="${o.offered_cover || 'https://placehold.co/150'}" class="trade-album-img">
+                                    <div class="mt-2 fw-bold text-truncate" style="font-size: 13px;">${o.offered_album}</div>
+                                </div>
+                                <div class="text-info fs-2"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="text-center" style="width: 120px;">
+                                    <div class="badge bg-danger mb-2">Ztratíš</div><br>
+                                    <img src="${o.my_cover || 'https://placehold.co/150'}" class="trade-album-img">
+                                    <div class="mt-2 fw-bold text-truncate" style="font-size: 13px;">${o.my_album}</div>
+                                </div>
+                            </div>
+                            <div class="text-center"><button class="btn btn-success px-4" onclick="acceptOffer(${o.offer_id})"><i class="fas fa-check"></i> Přijmout výměnu</button></div>
+                        </div>`).join('');
+                } else { offersDiv.style.display = 'none'; }
+
+                grid.innerHTML = data.market.length === 0 ? `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Zatím zde nejsou žádné nabídky.</div>` : '';
+                data.market.forEach(item => {
+                    const isMine = item.seller_id == data.current_user;
+                    let btn = isMine ? `<button class="btn btn-secondary w-100 mt-2" disabled>Tvoje nabídka</button>` : 
+                              (item.type === 'sell' ? `<button class="btn btn-success w-100 mt-2" onclick="buyAlbum(${item.id}, ${item.price})">Koupit za ${item.price}</button>` : 
+                              `<button class="btn btn-info w-100 mt-2 text-white" onclick="openTradeModal(${item.id})"><i class="fas fa-exchange-alt"></i> Nabídnout výměnu</button>`);
+                    
+                    let priceTag = item.type === 'sell' ? `<div class="fw-bold text-success">${item.price} Bodů</div>` : `<div class="fw-bold text-info">Výměna</div>`;
+
+                    grid.innerHTML += `
+                        <div class="album-card market-item-card" data-title="${item.title}" data-artist="${item.artist}" data-seller="${item.seller}">
+                            <div class="seller-badge"><i class="fas fa-user"></i> ${item.seller}</div>
+                            <img src="${item.cover_url || 'https://placehold.co/150'}">
+                            <h4 style="font-size: 16px; margin-bottom: 0;" class="text-truncate">${item.title}</h4>
+                            <p class="text-muted" style="font-size: 13px; margin-bottom: 10px;">${item.artist}</p>
+                            ${priceTag}${btn}
+                        </div>`;
+                });
+            } catch (e) { grid.innerHTML = '<p class="text-danger" style="grid-column: 1/-1; text-align: center;">Chyba načítání.</p>'; }
+        }
+
+        function toggleDropdown() { const dp = document.getElementById('custom-select-dropdown'); dp.style.display = dp.style.display === 'none' ? 'block' : 'none'; }
+        
+        function filterInventoryOptions() {
+            const query = document.getElementById('custom-select-search').value.toLowerCase();
+            document.querySelectorAll('.custom-option').forEach(opt => opt.style.display = opt.innerText.toLowerCase().includes(query) ? 'flex' : 'none');
+        }
+
+        function selectInventoryItem(id, title, img) {
+            document.getElementById('my-inventory-selected-id').value = id;
+            document.getElementById('custom-select-content').innerHTML = `<img src="${img}" style="width:30px; height:30px; object-fit:cover; border-radius:4px; margin-right:10px;"> <span style="font-weight:bold;">${title}</span>`;
+            document.getElementById('custom-select-dropdown').style.display = 'none';
+        }
+
+        function openTradeModal(listingId) {
+            if(myInventoryData.length === 0) { 
+                showToast('Nemáš žádná alba na výměnu!', 'error'); 
+                return; 
+            }
+            document.getElementById('trade-listing-id').value = listingId;
+            document.getElementById('custom-select-options').innerHTML = myInventoryData.map(i => `
+                <div class="custom-option" onclick="selectInventoryItem(${i.user_album_id}, '${i.title}', '${i.cover_url || 'https://placehold.co/150'}')">
+                    <img src="${i.cover_url || 'https://placehold.co/150'}" style="width:40px; height:40px; border-radius:4px; margin-right:15px;">
+                    <div><div class="custom-option-title">${i.title}</div><div class="text-muted small">${i.artist}</div></div>
+                </div>`).join('');
+            document.getElementById('tradeModal').style.display = 'flex';
+        }
+
+        function closeTradeModal() { document.getElementById('tradeModal').style.display = 'none'; }
+
+        async function sendTradeOffer() {
+            const offeredId = document.getElementById('my-inventory-selected-id').value;
+            if(!offeredId) { 
+                showToast('Musíš vybrat album k výměně!', 'warning'); 
+                return; 
+            }
+            
+            const fd = new FormData(); 
+            fd.append('action', 'make_offer'); 
+            fd.append('listing_id', document.getElementById('trade-listing-id').value); 
+            fd.append('offered_user_album_id', offeredId);
+            
+            try {
+                const res = await fetch('market.php', { method: 'POST', body: fd });
+                const data = await res.json(); 
+                
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) {
+                    closeTradeModal();
+                }
+            } catch (error) {
+                showToast('Chyba komunikace se serverem.', 'error');
+            }
+        }
+
+        async function acceptOffer(offerId) {
+            if(!confirm('Opravdu potvrdit tuto výměnu?')) return;
+            
+            const fd = new FormData(); 
+            fd.append('action', 'accept_offer'); 
+            fd.append('offer_id', offerId);
+            
+            try {
+                const res = await fetch('market.php', { method: 'POST', body: fd });
+                const data = await res.json(); 
+                
+                showToast(data.message, data.success ? 'success' : 'error');
+                if (data.success) loadMarket();
+            } catch (error) {
+                showToast('Chyba komunikace se serverem.', 'error');
+            }
+        }
+
+        loadMarket();
+    </script>
+</body>
+</html>

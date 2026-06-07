@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeedleSpin - Miny</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* --- DEFINICE TŘÍ BAREVNÝCH MOTIVŮ --- */
+        :root {
+            /* VÝCHOZÍ REŽIM (Střed) */
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --text-main: #ffffff;
+            --text-muted: #aaa;
+            --input-bg: #3d3d54;
+            --input-border: #4d4d64;
+            --accent: #e55a2b;
+            --nav-text: #ffffff;
+        }
+
+        body.light-mode {
+            /* SVĚTLÝ REŽIM (Vlevo) */
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff; 
+            --bg-card: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #555;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --accent: #ff6b35;
+            --nav-text: #444;
+        }
+
+        body.dark-mode {
+            /* ČERNÝ REŽIM (Vpravo) */
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-card: #161616;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --input-bg: #222;
+            --input-border: #333;
+            --accent: #ff4500;
+            --nav-text: #ffffff;
+        }
+
+        /* --- ZÁKLADNÍ STYLY --- */
+        body { 
+            background-color: var(--bg-main) !important; 
+            color: var(--text-main) !important; 
+            transition: 0.3s;
+            margin: 0; font-family: sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Design */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; top: 0; left: 0; width: 250px;
+            padding: 20px; box-sizing: border-box; z-index: 1000;
+            border-right: 1px solid var(--input-border);
+            display: flex; flex-direction: column; transition: 0.3s;
+        }
+        
+        .sidebar .profile { margin-bottom: 20px; text-align: center; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
+
+        .sidebar .nav-link {
+            color: var(--nav-text) !important;
+            padding: 10px 15px; margin-bottom: 5px; border-radius: 12px;
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+            font-weight: 500; transition: 0.2s;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--accent) !important;
+            color: white !important;
+            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--input-border);
+            padding-top: 10px;
+        }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+
+        /* Herní panel a prvky */
+        .game-panel { 
+            background: var(--bg-card); border-radius: 12px; padding: 25px; 
+            border: 1px solid var(--input-border); max-width: 600px; margin: 0 auto; 
+            transition: 0.3s;
+        }
+
+        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px auto; }
+
+        .mine-btn { 
+            background: var(--input-bg); border: 2px solid var(--input-border); 
+            border-radius: 8px; aspect-ratio: 1/1; cursor: pointer; transition: 0.2s; 
+            font-size: 24px; display: flex; align-items: center; justify-content: center; 
+            color: var(--text-main); 
+        }
+        .mine-btn:hover:not(:disabled) { border-color: var(--accent); transform: scale(1.05); }
+        .mine-btn.safe { background: #00d26a; border-color: #00b85a; cursor: default; color: white; }
+        .mine-btn.bomb { background: #ff4444; border-color: #cc0000; cursor: default; color: white; }
+        .mine-btn.dimmed { opacity: 0.3; cursor: default; }
+
+        .form-control {
+            background-color: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            border: 1px solid var(--input-border) !important;
+        }
+
+        /* --- NOTIFIKAČNÍ TOASTY --- */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .custom-toast {
+            min-width: 250px;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border-left: 5px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards;
+        }
+        .custom-toast.error { border-left-color: #dc3545; }
+        .custom-toast.success { border-left-color: #198754; }
+        .custom-toast.warning { border-left-color: #ffc107; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* RESPONZIVITA (Mobilní lišta) */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100% !important; height: auto !important; position: fixed !important; 
+                top: auto !important; bottom: 0 !important; left: 0 !important;
+                padding: 10px 5px !important; flex-direction: column !important;
+                background-color: #ff6b35 !important;
+                border-top: 1px solid rgba(255,255,255,0.2); border-radius: 20px 20px 0 0;
+            }
+            .sidebar .profile { display: none; } 
+            .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; width: 100% !important; }
+            .sidebar .nav-link { flex: 1 1 30% !important; font-size: 11px !important; color: white !important; flex-direction: column; align-items: center; padding: 8px 2px; }
+            
+            .sidebar-footer {
+                width: 100% !important; margin-top: 5px !important; padding-top: 8px !important;
+                display: flex !important; flex-direction: row !important; justify-content: center !important; gap: 20px !important;
+                border-top: 1px solid rgba(255,255,255,0.2);
+            }
+            .sidebar-footer .nav-link { flex: none !important; width: auto !important; font-size: 12px !important; }
+            .main-content { margin-left: 0 !important; padding: 15px; padding-bottom: 150px !important; }
+            .mines-grid { gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'light') document.body.classList.add('light-mode');
+            else if (theme === 'dark') document.body.classList.add('dark-mode');
+        })();
+    </script>
+    
+    <div id="toast-container"></div>
+
+    <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="https://placehold.co/80" alt="Avatar">
+        </div>
+
+        <nav>
+            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link">📦 Inventář</a>
+            <a href="trziste.html" class="nav-link">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link active">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-link" onclick="odhlasit()">📤 Odhlásit se</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="minihry.html" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Zpět</a>
+            <div style="background: var(--bg-card); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--input-border);">
+                Body: <span id="points-display" class="fw-bold text-warning">...</span>
+            </div>
+        </div>
+
+        <div class="game-panel">
+            <h2 class="text-center mb-4"><i class="fas fa-bomb"></i> Miny</h2>
+            
+            <div class="row mb-4">
+                <div class="col-6">
+                    <label class="small fw-bold mb-1" style="color: var(--text-main);">Sázka (Body)</label>
+                    <input type="number" id="mine-bet" class="form-control" value="10">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold mb-1" style="color: var(--text-main);">Počet min (1-24)</label>
+                    <input type="number" id="mine-count" class="form-control" value="3" min="1" max="24">
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-2">
+                <button class="btn btn-warning w-50 fw-bold" id="btn-start-mines" onclick="startMines()">Začít hru</button>
+                <button class="btn btn-success w-50 fw-bold" id="btn-cashout-mines" onclick="cashoutMines()" disabled>Vybrat: <span id="current-win">0</span></button>
+            </div>
+
+            <div class="mines-grid" id="mines-grid"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Funkce pro toasty (upozornění bez alertu)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let icon = '<i class="fas fa-info-circle me-2"></i>';
+            if(type === 'success') icon = '<i class="fas fa-check-circle me-2 text-success"></i>';
+            if(type === 'error') icon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
+            if(type === 'warning') icon = '<i class="fas fa-exclamation-triangle me-2 text-warning"></i>';
+
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3300);
+        }
+
+        async function updatePoints() {
+            try {
+                const res = await fetch('obchod.php?action=check');
+                const data = await res.json();
+                if(data.success) document.getElementById('points-display').innerText = data.new_balance;
+            } catch(e) {}
+        }
+        updatePoints();
+
+        let gameActive = false;
+
+        function initGrid() {
+            const grid = document.getElementById('mines-grid');
+            grid.innerHTML = '';
+            for(let i=0; i<25; i++) {
+                grid.innerHTML += `<button class="mine-btn" id="tile-${i}" onclick="clickTile(${i})" disabled><i class="fas fa-question"></i></button>`;
+            }
+        }
+        initGrid();
+
+        async function startMines() {
+            const bet = document.getElementById('mine-bet').value;
+            const mines = document.getElementById('mine-count').value;
+            const fd = new FormData(); fd.append('action', 'start_mines'); fd.append('bet', bet); fd.append('mines', mines);
+            
+            const res = await fetch('api_minigames.php', { method: 'POST', body: fd });
+            const data = await res.json();
+
+            // Použití toastu místo alertu
+            if(!data.success) { showToast(data.message, 'error'); return; }
+
+            gameActive = true; updatePoints();
+            document.getElementById('current-win').innerText = bet;
+            document.getElementById('btn-start-mines').disabled = true;
+            document.getElementById('btn-cashout-mines').disabled = false;
+
+            for(let i=0; i<25; i++) {
+                const btn = document.getElementById(`tile-${i}`);
+                btn.className = "mine-btn"; btn.disabled = false; btn.innerHTML = '';
+            }
+            
+            showToast('Hra začala! Najdi diamanty.', 'info');
+        }
+
+        async function clickTile(index) {
+            if(!gameActive) return;
+            const fd = new FormData(); fd.append('action', 'click_mine'); fd.append('tile', index);
+            const res = await fetch('api_minigames.php', { method: 'POST', body: fd });
+            const data = await res.json();
+
+            // Použití toastu místo alertu
+            if(!data.success) { showToast(data.message, 'error'); return; }
+            const btn = document.getElementById(`tile-${index}`);
+
+            if(data.state === 'bomb') {
+                gameActive = false;
+                document.getElementById('btn-start-mines').disabled = false;
+                document.getElementById('btn-cashout-mines').disabled = true;
+                document.getElementById('current-win').innerText = "0";
+                
+                data.grid.forEach((val, i) => {
+                    const b = document.getElementById(`tile-${i}`);
+                    b.disabled = true;
+                    if(val === 1) { b.classList.add('bomb'); b.innerHTML = '<i class="fas fa-bomb"></i>'; }
+                    else if (b.className === 'mine-btn') { b.classList.add('dimmed'); b.innerHTML = '<i class="fas fa-gem text-success"></i>'; }
+                });
+                
+                showToast('BUM! Šlápl jsi na minu. Prohráváš sázku.', 'error');
+                
+            } else {
+                btn.classList.add('safe'); btn.innerHTML = '<i class="fas fa-gem"></i>'; btn.disabled = true;
+                document.getElementById('current-win').innerText = data.current_win + ` (x${data.multiplier})`;
+            }
+        }
+
+        async function cashoutMines() {
+            if(!gameActive) return;
+            const fd = new FormData(); fd.append('action', 'cashout_mines');
+            const res = await fetch('api_minigames.php', { method: 'POST', body: fd });
+            const data = await res.json();
+
+            // Použití toastu místo alertu
+            if(!data.success) { showToast(data.message, 'error'); return; }
+
+            gameActive = false;
+            document.getElementById('btn-start-mines').disabled = false;
+            document.getElementById('btn-cashout-mines').disabled = true;
+            
+            data.grid.forEach((val, i) => {
+                const b = document.getElementById(`tile-${i}`);
+                b.disabled = true;
+                if(!b.classList.contains('safe')) {
+                    if(val === 1) { b.classList.add('dimmed'); b.innerHTML = '<i class="fas fa-bomb text-danger"></i>'; }
+                    else { b.classList.add('dimmed'); b.innerHTML = '<i class="fas fa-gem text-success"></i>'; }
+                }
+            });
+
+            showToast(`Vybral jsi výhru ${data.win} bodů!`, 'success');
+            updatePoints();
+        }
+    </script>
+</body>
+</html>

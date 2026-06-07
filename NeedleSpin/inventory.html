@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeedleSpin - Inventář</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- DEFINICE BAREV PRO OBA REŽIMY --- */
+        :root {
+            /* Tmavý režim (Výchozí) */
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --text-main: #ffffff;
+            --text-muted: #bbb;
+            --border-color: #5a5a7a;
+            --accent: #e55a2b;
+        }
+
+        body.light-mode {
+            /* Světlý režim */
+            --bg-main: #f0f2f5;      
+            --bg-sidebar: #ffffff;   
+            --bg-card: #ffffff;      
+            --text-main: #1a1a2e;    
+            --text-muted: #555;
+            --border-color: #cccccc;
+            --accent: #ff6b35;
+        }
+
+        body.dark-mode {
+            /* DARK REŽIM (Čistě černá) */
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-card: #161616;
+            --bg-item: #0a0a0a;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --border-color: #333;
+            --item-border: #333;
+            --accent: #ff4500;
+            --progress-bg: #1a1a1a;
+        }
+        
+        /* --- ZÁKLADNÍ STYLY --- */
+        body { 
+            background-color: var(--bg-main) !important; 
+            color: var(--text-main) !important; 
+            font-family: Arial, sans-serif;
+            margin: 0; padding: 0; transition: 0.3s;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - fixní vlevo */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; top: 0; left: 0; width: 250px;
+            padding: 20px; box-sizing: border-box; z-index: 1000;
+            border-right: 1px solid var(--border-color);
+            transition: 0.3s;
+            display: flex; flex-direction: column;
+        }
+
+        /* Profil v sidebaru - VYCENTROVÁNO */
+        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); }
+
+        .sidebar .nav-link {
+            color: var(--text-main) !important;
+            padding: 12px; margin-bottom: 10px; border-radius: 8px;
+            text-decoration: none; display: block; transition: 0.3s;
+        }
+        .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
+
+        /* Hlavní obsah */
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+
+        /* Karty alb */
+        .album-card { 
+            background-color: var(--bg-card) !important; 
+            border: 1px solid var(--border-color) !important;
+            border-radius: 10px; padding: 20px; text-align: center; 
+            position: relative; transition: 0.3s; 
+        }
+        
+        .album-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+
+        /* Sort Popup */
+        .sort-container { position: relative; display: inline-block; }
+        .sort-btn { 
+            background-color: var(--bg-card); color: var(--text-main); 
+            border: 1px solid var(--border-color); padding: 10px 15px; 
+            border-radius: 8px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; font-weight: bold;
+        }
+        .sort-popup {
+            display: none; position: absolute; right: 0; top: 110%; 
+            background: var(--bg-card); border: 1px solid var(--border-color); 
+            border-radius: 8px; min-width: 240px; z-index: 1000; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2); overflow: hidden;
+        }
+        .sort-option { 
+            padding: 12px 15px; cursor: pointer; color: var(--text-main); 
+            display: flex; align-items: center; gap: 10px; 
+            border-bottom: 1px solid var(--border-color); transition: 0.2s;
+        }
+        .sort-option:hover { background: var(--bg-main); color: var(--accent); }
+        .sort-option.active { color: var(--accent); font-weight: bold; }
+
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* --- NOTIFIKAČNÍ TOASTY --- */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .custom-toast {
+            min-width: 250px;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border-left: 5px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards;
+        }
+        .custom-toast.error { border-left-color: #dc3545; }
+        .custom-toast.success { border-left-color: #00d26a; }
+        .custom-toast.warning { border-left-color: #ffc107; }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* --- STYLOVÉ POTVRZOVACÍ OKNO --- */
+        .confirm-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;
+        }
+        .confirm-modal-box {
+            background: var(--bg-card); padding: 30px; border-radius: 12px; width: 400px; 
+            max-width: 90%; border: 1px solid var(--accent); text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .confirm-modal-box h4 { margin-top: 0; margin-bottom: 15px; color: var(--text-main); }
+        .confirm-modal-box p { color: var(--text-muted); margin-bottom: 25px; }
+        .confirm-modal-buttons { display: flex; gap: 10px; }
+        .confirm-btn-cancel { 
+            background: #5a5a7a; color: white; border: none; padding: 10px; 
+            border-radius: 8px; flex: 1; cursor: pointer; font-weight: bold;
+        }
+        .confirm-btn-action { 
+            background: var(--accent); color: white; border: none; padding: 10px; 
+            border-radius: 8px; flex: 1; cursor: pointer; font-weight: bold;
+        }
+
+        /* Mobilní responzivita */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0;
+                display: flex; flex-direction: row; justify-content: space-around; padding: 10px;
+                border-top: 1px solid var(--border-color); border-right: none;
+            }
+            .sidebar .profile { display: none; }
+            .sidebar nav { display: flex; width: 100%; justify-content: space-around; }
+            .sidebar .nav-link { margin-bottom: 0; padding: 8px; font-size: 14px; }
+            .main-content { margin-left: 0; padding-bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+       (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') document.body.classList.add('light-mode');
+        else if (theme === 'dark') document.body.classList.add('dark-mode');
+    })();
+    </script>
+    
+    <div id="toast-container"></div>
+
+    <div class="confirm-modal-overlay" id="confirmModal">
+        <div class="confirm-modal-box">
+            <h4 id="confirm-title">Potvrzení</h4>
+            <p id="confirm-text">Opravdu chceš tuto akci provést?</p>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-btn-cancel" onclick="closeConfirmModal()">Zrušit</button>
+                <button class="confirm-btn-action" id="confirm-action-btn">Potvrdit</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="https://placehold.co/80" alt="Avatar">
+        </div>
+
+        <nav>
+            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link" style="font-weight: bold; color: #c44111 !important;">📦 Inventář</a>
+            <a href="trziste.html" class="nav-link">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
+        </nav>
+
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
+            <a href="#" class="nav-link" onclick="odhlasit()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1><i class="fas fa-boxes"></i> Můj Inventář</h1>
+            
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <span id="item-count" class="text-muted">Načítám...</span>
+                
+                <div class="sort-container">
+                    <button class="sort-btn" onclick="toggleSortPopup(event)" id="sort-toggle-btn">
+                        <i class="fas fa-sort-amount-down"></i> <span id="current-sort-label">Nejnovější</span>
+                    </button>
+                    
+                    <div class="sort-popup" id="sort-popup">
+                        <div class="sort-option active" onclick="sortAlbums('newest', 'Nejnověji přidáno', this, event)">
+                            <i class="fas fa-clock"></i> Nejnověji přidáno
+                        </div>
+                        <div class="sort-option" onclick="sortAlbums('oldest', 'Nejstarší přidáno', this, event)">
+                            <i class="fas fa-history"></i> Nejstarší přidáno
+                        </div>
+                        <div class="sort-option" onclick="sortAlbums('highest_rating', 'Nejvyšší hodnocení', this, event)">
+                            <i class="fas fa-star"></i> Nejvyšší hodnocení
+                        </div>
+                        <div class="sort-option" onclick="sortAlbums('lowest_rating', 'Nejnižší hodnocení', this, event)">
+                            <i class="fas fa-star-half-alt"></i> Nejnižší hodnocení
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="album-container" id="inventory-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--text-muted);">
+                <i class="fas fa-spinner fa-spin me-2"></i> Načítám tvoji sbírku...
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Funkce pro toasty
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let icon = '<i class="fas fa-info-circle me-2"></i>';
+            if(type === 'success') icon = '<i class="fas fa-check-circle me-2 text-success"></i>';
+            if(type === 'error') icon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
+            if(type === 'warning') icon = '<i class="fas fa-exclamation-triangle me-2 text-warning"></i>';
+
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3300);
+        }
+
+        // Custom Confirm systém
+        let currentConfirmCallback = null;
+
+        function showConfirmModal(title, text, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-text').innerText = text;
+            currentConfirmCallback = callback;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            currentConfirmCallback = null;
+        }
+
+        document.getElementById('confirm-action-btn').addEventListener('click', () => {
+            if (currentConfirmCallback) currentConfirmCallback();
+            closeConfirmModal();
+        });
+
+        // Třídění a Popup UI
+        function toggleSortPopup(event) {
+            event.stopPropagation();
+            const popup = document.getElementById('sort-popup');
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        }
+
+        document.addEventListener('click', function() {
+            const popup = document.getElementById('sort-popup');
+            if (popup.style.display === 'block') popup.style.display = 'none';
+        });
+
+        let currentSortMethod = 'newest';
+
+        async function loadInventory() {
+            const grid = document.getElementById('inventory-grid');
+            const countLabel = document.getElementById('item-count');
+
+            try {
+                const res = await fetch('get_inventory.php');
+                const data = await res.json();
+
+                if (!data.success) { 
+                    grid.innerHTML = `<div style="text-align:center; color:#ff6b35; grid-column: 1/-1;">Chyba DB: ${data.message}</div>`;
+                    return; 
+                }
+                
+                if (data.items.length === 0) {
+                    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px;">Zatím nic nevlastníš</div>`;
+                    countLabel.innerText = "0 alb"; return;
+                }
+
+                grid.innerHTML = '';
+                countLabel.innerText = `${data.items.length} alb`;
+
+                data.items.forEach((item, index) => {
+                    const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                    const html = `
+                        <div class="album-card sortable-item" 
+                             data-id="${index}" 
+                             data-rating="${item.avg_rating}">
+                            <img src="${item.cover_url || 'https://placehold.co/300'}" style="width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px;">
+                            <h4 style="margin: 10px 0 5px 0;">${item.title}</h4>
+                            <p class="text-muted" style="margin: 0; font-size: 14px;">${item.artist}</p>
+                            
+                            <div style="font-size: 13px; margin-top: 8px; font-weight: bold;" class="text-muted">
+                                <i class="fas fa-star text-warning"></i> ${parseFloat(item.avg_rating).toFixed(1)} / 5.0
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+                                <button style="background-color: #5a5a7a; color: white; border: none; padding: 8px 15px; border-radius: 15px; cursor: pointer;" onclick="window.location.href='album.html?id=${item.album_id}'">Detail</button>
+                                <div style="display: flex; gap: 8px;">
+                                    <button style="background-color: #00d26a; color: white; border: none; padding: 8px; border-radius: 15px; cursor: pointer; flex: 1; font-weight: bold;" onclick="quickSell(${item.user_album_id}, ${item.sell_price || 25}, '${safeTitle}')">Prodat (${item.sell_price || 25})</button>
+                                    <button style="background-color: #0dcaf0; color: white; border: none; padding: 8px; border-radius: 15px; cursor: pointer; flex: 1; font-weight: bold;" onclick="putOnMarket(${item.user_album_id}, 'trade', '${safeTitle}')">Vyměnit</button>
+                                </div>
+                            </div>
+                        </div>`;
+                    grid.innerHTML += html;
+                });
+
+                executeSort();
+
+            } catch (e) {
+                console.error("Chyba:", e);
+                grid.innerHTML = '<div style="text-align:center; grid-column: 1/-1;" class="text-danger">Kritická chyba spojení se serverem.</div>';
+            }
+        }
+
+        function sortAlbums(method, labelText, element, event) {
+            event.stopPropagation();
+            currentSortMethod = method;
+            document.getElementById('current-sort-label').innerText = labelText;
+            document.querySelectorAll('.sort-option').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('sort-popup').style.display = 'none';
+            executeSort();
+        }
+
+        function executeSort() {
+            const grid = document.getElementById('inventory-grid');
+            const items = Array.from(grid.getElementsByClassName('sortable-item'));
+
+            items.sort((a, b) => {
+                let diff = 0;
+                let idA = parseInt(a.getAttribute('data-id'));
+                let idB = parseInt(b.getAttribute('data-id'));
+                let ratingA = parseFloat(a.getAttribute('data-rating')) || 0;
+                let ratingB = parseFloat(b.getAttribute('data-rating')) || 0;
+
+                if (currentSortMethod === 'newest') diff = idA - idB;
+                else if (currentSortMethod === 'oldest') diff = idB - idA;
+                else if (currentSortMethod === 'highest_rating') diff = ratingB - ratingA;
+                else if (currentSortMethod === 'lowest_rating') {
+                    let valA = ratingA === 0 ? 99 : ratingA;
+                    let valB = ratingB === 0 ? 99 : ratingB;
+                    diff = valA - valB; 
+                }
+
+                if (diff === 0 && (currentSortMethod === 'highest_rating' || currentSortMethod === 'lowest_rating')) {
+                    const titleA = a.querySelector('h4').innerText.toLowerCase();
+                    const titleB = b.querySelector('h4').innerText.toLowerCase();
+                    return titleA.localeCompare(titleB);
+                }
+                return diff;
+            });
+
+            grid.innerHTML = '';
+            items.forEach(item => grid.appendChild(item));
+        }
+
+        function putOnMarket(id, type, title) {
+            showConfirmModal(
+                'Vyměnit album?',
+                `Chceš nabídnout album "${title}" k výměně na komunitním tržišti?`,
+                async () => {
+                    const fd = new FormData(); fd.append('action', 'create_listing'); fd.append('user_album_id', id); fd.append('type', type); fd.append('price', 0);
+                    const res = await fetch('market.php', { method: 'POST', body: fd });
+                    const data = await res.json(); 
+                    showToast(data.message, data.success ? 'success' : 'error');
+                }
+            );
+        }
+
+        function quickSell(id, price, title) {
+            showConfirmModal(
+                'Prodat album?',
+                `Opravdu chceš systémově prodat album "${title}" za ${price} bodů?`,
+                async () => {
+                    const fd = new FormData(); fd.append('action', 'quick_sell'); fd.append('user_album_id', id);
+                    const res = await fetch('market.php', { method: 'POST', body: fd });
+                    const data = await res.json(); 
+                    showToast(data.message, data.success ? 'success' : 'error');
+                    if (data.success) loadInventory(); 
+                }
+            );
+        }
+
+        loadInventory();
+    </script>
+</body>
+</html>

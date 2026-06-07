@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeedleSpin - Skořápky</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* --- DEFINICE BAREVNÝCH MOTIVŮ --- */
+        :root {
+            /* VÝCHOZÍ REŽIM (Střed) */
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --text-main: #ffffff;
+            --text-muted: #aaa;
+            --input-border: #4d4d64;
+            --accent: #e55a2b;
+            --nav-text: #ffffff;
+            --shell-bg: #3d3d54;
+        }
+
+        body.light-mode {
+            /* SVĚTLÝ REŽIM (Vlevo) */
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #555;
+            --input-border: #cccccc;
+            --accent: #ff6b35;
+            --nav-text: #444;
+            --shell-bg: #e0e0e0;
+        }
+
+        body.dark-mode {
+            /* ČERNÝ REŽIM (Vpravo) */
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111;
+            --bg-card: #161616;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --input-border: #333;
+            --accent: #ff4500;
+            --nav-text: #ffffff;
+            --shell-bg: #222;
+        }
+
+        /* --- ZÁKLADNÍ STYLY --- */
+        body { 
+            background-color: var(--bg-main) !important; 
+            color: var(--text-main) !important; 
+            transition: 0.3s;
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        /* Sidebar Design */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; top: 0; left: 0; width: 250px;
+            padding: 20px; box-sizing: border-box; z-index: 1000;
+            border-right: 1px solid var(--input-border);
+            display: flex; flex-direction: column; transition: 0.3s;
+        }
+
+        /* Profil v sidebaru */
+        .sidebar .profile { margin-bottom: 20px; text-align: center; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
+
+        .sidebar .nav-link {
+            color: var(--nav-text) !important;
+            padding: 10px 15px; margin-bottom: 5px; border-radius: 12px;
+            text-decoration: none; display: flex; align-items: center; gap: 12px;
+            font-weight: 500; transition: 0.2s;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--accent) !important;
+            color: white !important;
+            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--input-border);
+            padding-top: 10px;
+        }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
+
+        /* Herní panel */
+        .game-panel { 
+            background: var(--bg-card); 
+            border-radius: 12px; padding: 40px 25px; 
+            border: 1px solid var(--input-border); 
+            max-width: 700px; margin: 0 auto; text-align: center;
+            transition: 0.3s;
+        }
+        
+        .shell-btn {
+            background: var(--shell-bg); border: 2px solid var(--input-border); border-radius: 12px;
+            padding: 40px; font-size: 60px; color: #ff6b35; cursor: pointer; transition: 0.3s; width: 30%;
+        }
+        .shell-btn:hover:not(:disabled) { background: var(--input-border); transform: translateY(-10px); }
+        .shell-btn.winner { background: #00d26a !important; border-color: #00b85a !important; color: white !important; }
+        .shell-btn.loser { background: #ff4444 !important; border-color: #cc0000 !important; color: white !important; }
+        .dimmed { opacity: 0.3; }
+
+        /* Responzivita (Mobilní lišta) */
+        @media (max-width: 768px) {
+            .sidebar { 
+                width: 100% !important; height: auto !important; position: fixed !important; top: auto !important; bottom: 0 !important; 
+                flex-direction: column !important; padding: 10px 5px !important; border-radius: 20px 20px 0 0; 
+                background-color: #ff6b35 !important; border-right: none; border-top: 1px solid rgba(255,255,255,0.2);
+            }
+            .sidebar .profile { display: none; } /* Na mobilu schovat ikonu */
+            .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }
+            .sidebar .nav-link { flex: 1 1 30% !important; font-size: 11px !important; flex-direction: column; color: white !important; gap: 2px; }
+            
+            .sidebar-footer { 
+                display: flex !important; flex-direction: row !important; justify-content: center !important; 
+                gap: 20px !important; border-top: 1px solid rgba(255,255,255,0.2); margin-top: 5px; padding-top: 5px; 
+            }
+            .sidebar-footer .nav-link { flex: none !important; font-size: 12px !important; }
+
+            .main-content { margin-left: 0; padding: 15px; padding-bottom: 140px; }
+            .shell-btn { padding: 20px; font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'light') document.body.classList.add('light-mode');
+            else if (theme === 'dark') document.body.classList.add('dark-mode');
+        })();
+    </script>
+    <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="https://placehold.co/80" alt="Avatar">
+        </div>
+
+        <nav>
+            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link">📦 Inventář</a>
+            <a href="trziste.html" class="nav-link">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link active">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="nav-link" onclick="odhlasit()">📤 Odhlásit se</a>
+        </div>
+    </div>
+
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="minihry.html" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Zpět</a>
+            <div style="background: var(--bg-card); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--input-border);">
+                Body: <span id="points-display" class="fw-bold text-warning">Načítám...</span>
+            </div>
+        </div>
+
+        <div class="game-panel">
+            <h2 class="mb-4"><i class="fas fa-boxes"></i> Kde je deska?</h2>
+            
+            <div class="d-flex justify-content-center gap-3 gap-md-4 mb-5">
+                <button class="shell-btn" id="shell-1" onclick="playShells(1)"><i class="fas fa-box"></i></button>
+                <button class="shell-btn" id="shell-2" onclick="playShells(2)"><i class="fas fa-box"></i></button>
+                <button class="shell-btn" id="shell-3" onclick="playShells(3)"><i class="fas fa-box"></i></button>
+            </div>
+            
+            <div id="shells-msg" class="fw-bold fs-4"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        async function updatePoints() {
+            try {
+                const res = await fetch('obchod.php?action=check');
+                const data = await res.json();
+                if(data.success) document.getElementById('points-display').innerText = data.new_balance;
+            } catch(e) {}
+        }
+        updatePoints();
+
+        async function playShells(guess) {
+            [1, 2, 3].forEach(id => document.getElementById(`shell-${id}`).disabled = true);
+            const msgBox = document.getElementById('shells-msg');
+            msgBox.className = "fw-bold text-muted";
+            msgBox.innerText = "Otevírám bednu...";
+
+            const fd = new FormData(); fd.append('action', 'play_shells'); fd.append('guess', guess);
+
+            try {
+                const res = await fetch('api_minigames.php', { method: 'POST', body: fd });
+                const data = await res.json();
+                
+                setTimeout(() => {
+                    if(!data.success) {
+                        msgBox.className = "fw-bold text-danger"; msgBox.innerText = data.message;
+                        [1, 2, 3].forEach(id => document.getElementById(`shell-${id}`).disabled = false);
+                        return;
+                    }
+
+                    const winCup = data.winning_cup;
+                    [1, 2, 3].forEach(id => {
+                        const btn = document.getElementById(`shell-${id}`);
+                        if(id === winCup) { btn.classList.add('winner'); btn.innerHTML = '<i class="fas fa-record-vinyl"></i>'; }
+                        else { btn.classList.add('dimmed'); }
+                        
+                        if(id === guess && guess !== winCup) {
+                            btn.classList.add('loser'); btn.classList.remove('dimmed'); btn.innerHTML = '<i class="fas fa-times"></i>';
+                        }
+                    });
+
+                    if(data.is_win) { msgBox.className = "fw-bold text-success"; updatePoints(); } 
+                    else { msgBox.className = "fw-bold text-danger"; updatePoints(); } // Přidán updatePoints i při prohře, aby se odečetla sázka
+                    msgBox.innerText = data.message;
+                    
+                    setTimeout(() => {
+                        [1, 2, 3].forEach(id => {
+                            const btn = document.getElementById(`shell-${id}`);
+                            btn.className = "shell-btn"; btn.innerHTML = '<i class="fas fa-box"></i>'; btn.disabled = false;
+                        });
+                        msgBox.innerText = "";
+                    }, 5000);
+                }, 800);
+
+            } catch (e) {
+                msgBox.innerText = "Chyba připojení.";
+                [1, 2, 3].forEach(id => document.getElementById(`shell-${id}`).disabled = false);
+            }
+        }
+    </script>
+</body>
+</html>
