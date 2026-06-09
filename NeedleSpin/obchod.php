@@ -2,10 +2,12 @@
 session_start();
 header('Content-Type: application/json');
 
-$host = 'localhost'; 
-$db   = 'needlespin'; 
-$user = 'root'; 
-$pass = '';
+// PŘIPOJENÍ K IONOS DATABÁZI
+$host = 'db5020657101.hosting-data.io';
+$db   = 'dbs15771817';
+$user = 'dbu1233490';
+$pass = 'SkibidiSigma10@';
+
 $apiToken = "vBKumlLqKmZWKMQgXXJCvAlKGCzxDHslVygvenxD"; 
 $PACK_PRICE = 100;
 
@@ -41,7 +43,7 @@ if ($userPoints < $PACK_PRICE) {
     exit;
 }
 
-// 2. NASTAVENÍ PACKU
+// NASTAVENÍ PACKU
 $packType = isset($_POST['genre']) ? $_POST['genre'] : 'Rock';
 $apiParams = "";
 $packId = 3; 

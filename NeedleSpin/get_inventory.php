@@ -5,7 +5,11 @@ header('Content-Type: application/json');
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-$host = 'localhost'; $db = 'needlespin'; $user = 'root'; $pass = '';
+// PŘIPOJENÍ K IONOS DATABÁZI
+$host = 'db5020657101.hosting-data.io';
+$db   = 'dbs15771817';
+$user = 'dbu1233490';
+$pass = 'SkibidiSigma10@';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
@@ -21,7 +25,6 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    
     $stmt = $pdo->prepare("
         SELECT 
             ua.user_album_id, 
@@ -60,5 +63,4 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'SQL Chyba: ' . $e->getMessage()]);
 }
-
 ?>

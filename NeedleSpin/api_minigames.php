@@ -1,15 +1,18 @@
 <?php
-
 session_start();
 header('Content-Type: application/json');
 
-$host = 'localhost'; $db = 'needlespin'; $user = 'root'; $pass = '';
+// PŘIPOJENÍ K IONOS DATABÁZI
+$host = 'db5020657101.hosting-data.io';
+$db   = 'dbs15771817';
+$user = 'dbu1233490';
+$pass = 'SkibidiSigma10@';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    echo json_encode(['success' => false, 'message' => 'DB Error']); exit;
+    echo json_encode(['success' => false, 'message' => 'DB Error: ' . $e->getMessage()]); exit;
 }
 
 if (!isset($_SESSION['user_id'])) {
@@ -61,6 +64,7 @@ function updateQuest($userId, $actionType, $amount, $pdo) {
         }
     }
 }
+
 try {
     if ($action === 'play_shells') {
         $guess = (int)$_POST['guess'];
@@ -118,6 +122,7 @@ try {
         updateQuest($userId, 'play_minigame', 1, $pdo);
         echo json_encode(['success' => true, 'message' => 'Hra začala!']); exit;
     }
+    
     if ($action === 'click_mine') {
         if (!isset($_SESSION['mines_game']) || !$_SESSION['mines_game']['active']) {
             echo json_encode(['success' => false, 'message' => 'Hra neběží!']); exit;
@@ -150,6 +155,7 @@ try {
 
         echo json_encode(['success' => true, 'state' => 'safe', 'current_win' => $currentWin, 'multiplier' => number_format($multiplier, 2)]); exit;
     }
+    
     if ($action === 'cashout_mines') {
         if (!isset($_SESSION['mines_game']) || !$_SESSION['mines_game']['active']) {
             echo json_encode(['success' => false, 'message' => 'Není co vybrat!']); exit;
@@ -183,5 +189,4 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Chyba: ' . $e->getMessage()]);
 }
-
 ?>

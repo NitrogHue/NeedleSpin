@@ -3,13 +3,20 @@ session_start();
 header('Content-Type: application/json');
 ini_set('display_errors', 0);
 
-$host = 'localhost'; $db = 'needlespin'; $user = 'root'; $pass = '';
+// PŘIPOJENÍ K IONOS DATABÁZI
+$host = 'db5020657101.hosting-data.io';
+$db   = 'dbs15771817';
+$user = 'dbu1233490';
+$pass = 'SkibidiSigma10@';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    if (!isset($_SESSION['user_id'])) { echo json_encode(['success' => false, 'message' => 'Nepřihlášen']); exit; }
+    if (!isset($_SESSION['user_id'])) { 
+        echo json_encode(['success' => false, 'message' => 'Nepřihlášen']); 
+        exit; 
+    }
     $userId = $_SESSION['user_id'];
     
     $today = date('Y-m-d');
@@ -49,7 +56,6 @@ try {
     echo json_encode(['success' => true, 'quests' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Chyba DB']);
+    echo json_encode(['success' => false, 'message' => 'Chyba DB: ' . $e->getMessage()]);
 }
-
 ?>

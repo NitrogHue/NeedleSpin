@@ -5,7 +5,11 @@ header('Content-Type: application/json');
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-$host = 'localhost'; $db = 'needlespin'; $user = 'root'; $pass = '';
+// PŘIPOJENÍ K IONOS DATABÁZI
+$host = 'db5020657101.hosting-data.io'; 
+$db   = 'dbs15771817'; 
+$user = 'dbu1233490'; 
+$pass = 'SkibidiSigma10@';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
@@ -87,6 +91,7 @@ try {
         $pdo->commit();
         echo json_encode(['success' => true, 'message' => 'Koupeno!']); exit;
     }
+    
     if ($action === 'make_offer') {
         $listingId = $_POST['listing_id'];
         $offeredUserAlbumId = $_POST['offered_user_album_id'];
@@ -121,6 +126,7 @@ try {
         $pdo->commit();
         echo json_encode(['success' => true, 'message' => 'Výměna úspěšná!']); exit;
     }
+    
     if ($action === 'quick_sell') {
         $userAlbumId = $_POST['user_album_id'];
         $pdo->beginTransaction();
@@ -147,6 +153,5 @@ try {
 } catch (Exception $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
     echo json_encode(['success' => false, 'message' => 'Chyba: ' . $e->getMessage()]);
-    
 }
 ?>

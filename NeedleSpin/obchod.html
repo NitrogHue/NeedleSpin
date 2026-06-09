@@ -126,11 +126,16 @@
         .text-muted { color: var(--text-muted) !important; }
 
         @media (max-width: 768px) {
-            .sidebar { width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0; display: flex; justify-content: space-around; border-right: none; border-top: 1px solid var(--border-color); }
+            .sidebar {
+                width: 100% !important; height: auto !important; position: fixed !important; bottom: 0 !important; top: auto !important; left: 0 !important;
+                padding: 10px 5px !important; flex-direction: column !important; border-radius: 20px 20px 0 0; z-index: 9999 !important;
+                background-color: #ff6b35 !important;
+            }
             .sidebar .profile { display: none; }
-            .sidebar nav { display: flex; width: 100%; justify-content: space-around; }
-            .sidebar .nav-link { margin-bottom: 0; padding: 8px; font-size: 14px; }
-            .main-content { margin-left: 0; padding-bottom: 80px; }
+            .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }
+            .sidebar .nav-link { flex: 1 1 24% !important; font-size: 11px !important; text-align: center; margin-bottom: 0; padding: 8px 2px !important; }
+            .sidebar div[style*="margin-top:auto"] { position: static !important; width: 100% !important; margin-top: 5px !important; padding-top: 5px !important; border-top: 1px solid rgba(255,255,255,0.2) !important; display: flex !important; justify-content: center !important; gap: 20px !important; }
+            .main-content { margin-left: 0 !important; padding: 15px; padding-bottom: 150px !important; }
         }
     </style>
 </head>
@@ -149,12 +154,13 @@
         </div>
 
         <nav>
-            <a href="DomovniStranka.html" class="nav-link">🏠 Domovská stránka</a>
+            <a href="index.html" class="nav-link">🏠 Domovská stránka</a>
             <a href="obchod.html" class="nav-link" style="font-weight: bold; color: #c44111 !important;">🛒 Obchod</a>
             <a href="inventory.html" class="nav-link">📦 Inventář</a>
             <a href="trziste.html" class="nav-link">📈 Tržiště</a>
             <a href="minihry.html" class="nav-link">🎮 Minihry</a>
             <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="profil.html" class="nav-link">👤 Profil</a>
             <a href="login.html" class="nav-link">🔐 Přihlášení</a>
         </nav>
 

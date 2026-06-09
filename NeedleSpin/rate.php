@@ -11,10 +11,11 @@ if (!isset($_SESSION['user_id'])) {
 
 $currentUserId = $_SESSION['user_id'];
 
-$host = 'localhost';
-$dbname = 'needlespin';
-$username = 'root';
-$password = '';
+// PŘIPOJENÍ K IONOS DATABÁZI
+$host = 'db5020657101.hosting-data.io';
+$dbname = 'dbs15771817';
+$username = 'dbu1233490';
+$password = 'SkibidiSigma10@';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
@@ -55,10 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $artistId = $pdo->lastInsertId();
         }
 
-        $stmtAlb = $pdo->prepare("SELECT album_id FROM albums WHERE album_id = ?");
+        $stmtAlb = $pdo->prepare("SELECT album_id, nazev, cover_url FROM albums WHERE album_id = ?");
         $stmtAlb->execute([$albumId]);
-        
-        if (!$stmtAlb->fetch()) {
+        $existingAlbum = $stmtAlb->fetch(PDO::FETCH_ASSOC);
+
+        if (!$existingAlbum) {
+            // Album neexistuje — vloz nove
             $sqlInsAlb = "INSERT INTO albums (album_id, nazev, rok_vydani, cover_url, Artists_Artist_id) 
                           VALUES (?, ?, ?, ?, ?)";
             $stmtInsAlb = $pdo->prepare($sqlInsAlb);
@@ -69,6 +72,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $metaCover, 
                 $artistId
             ]);
+        } else {
+            // Album existuje — aktualizuj cover a nazev pokud jsou prazdne
+            $updateFields = [];
+            $updateValues = [];
+
+            if (empty($existingAlbum['cover_url']) && !empty($metaCover)) {
+                $updateFields[] = 'cover_url = ?';
+                $updateValues[] = $metaCover;
+            }
+            if ((empty($existingAlbum['nazev']) || $existingAlbum['nazev'] === 'Unknown Album') && !empty($metaTitle) && $metaTitle !== 'Unknown Album') {
+                $updateFields[] = 'nazev = ?';
+                $updateValues[] = $metaTitle;
+            }
+            if (!empty($updateFields)) {
+                $updateValues[] = $albumId;
+                $stmtUpd = $pdo->prepare("UPDATE albums SET " . implode(', ', $updateFields) . " WHERE album_id = ?");
+                $stmtUpd->execute($updateValues);
+            }
         }
 
         $sqlRating = "INSERT INTO ratings (hodnoceni, komentar, hodnoceni_Datum, Users_user_id, Albums_album_id, Songs_song_id) 

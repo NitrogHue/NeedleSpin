@@ -14,8 +14,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'Všechna pole musí být vyplněna!']);
         exit;
     }
-
-    // --- BEZPEČNOSTNÍ KONTROLA HESLA PŘÍMO NA SERVERU ---
     if (strlen($password) < 8) {
         echo json_encode(['success' => false, 'message' => 'Heslo musí mít alespoň 8 znaků!']);
         exit;
@@ -32,7 +30,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'Heslo musí obsahovat alespoň jeden speciální znak (např. !, ?, @, #, atd.)!']);
         exit;
     }
-    // ----------------------------------------------------
     
     $stmt = $pdo->prepare("SELECT user_id FROM users WHERE uzivatelskeJmeno = ?");
     $stmt->execute([$username]);

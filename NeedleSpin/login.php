@@ -1,42 +1,194 @@
-<?php
-session_start();
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-header('Content-Type: application/json');
-
-try {
-    require_once 'db.php';
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Přihlášení - NeedleSpin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    if (empty($username) || empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'Vyplň username a heslo!']);
-        exit;
-    }
+    <style>
+        :root {
+            --bg-main: #1a1a2e;
+            --bg-sidebar: #ff6b35; 
+            --bg-card: #2d2d44;
+            --text-main: #ffffff;
+            --text-muted: #aaa;
+            --input-bg: #3d3d54;
+            --input-border: #4d4d64;
+            --accent: #e55a2b;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+        }
 
-    $stmt = $pdo->prepare("SELECT user_id, uzivatelskeJmeno, Heslo_hash, email, body FROM users WHERE uzivatelskeJmeno = ?");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if ($user && password_verify($password, $user['Heslo_hash'])) {
-        $_SESSION['user_id'] = $user['user_id'];
-        $_SESSION['username'] = $user['uzivatelskeJmeno'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['points'] = $user['body'];
+        body.light-mode {
+            --bg-main: #f0f2f5;
+            --bg-sidebar: #ffffff; 
+            --bg-card: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #555;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --accent: #ff6b35;
+            --card-shadow: rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode {
+            --bg-main: #0a0a0a;
+            --bg-sidebar: #111111; 
+            --bg-card: #161616;
+            --text-main: #e0e0e0;
+            --text-muted: #777;
+            --input-bg: #111111;
+            --input-border: #333;
+            --accent: #ff4500;
+            --card-shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        body { background-color: var(--bg-main) !important; color: var(--text-main) !important; font-family: Arial, sans-serif; transition: 0.3s; margin: 0; min-height: 100vh; }
+
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
+            border-right: 1px solid var(--input-border); transition: 0.3s; display: flex; flex-direction: column;
+        }
         
-        echo json_encode([
-            'success' => true, 
-            'message' => 'Přihlášení úspěšné!',
-            'user' => [
-            'username' => $user['uzivatelskeJmeno'],
-            'points' => $user['body']
-            ]
-        ]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Špatné uživatelské jméno nebo heslo!']);
-    }
+        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); background-color: white; object-fit: cover; }
+        
+        .sidebar .nav-link { color: var(--text-main) !important; padding: 12px; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px; }
+        .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
+
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+
+        .search-bar { background-color: var(--bg-card); border-radius: 20px; padding: 5px 15px; display: flex; align-items: center; width: 100%; max-width: 600px; margin-bottom: 50px; box-shadow: 0 2px 10px var(--card-shadow); position: absolute; top: 30px; }
+        .search-bar input { background: transparent; border: none; color: var(--text-main); padding: 10px; width: 100%; outline: none; }
+
+        .login-form { background-color: var(--bg-card); padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px var(--card-shadow); border: 1px solid var(--input-border); }
+        .login-form label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-muted); }
+        .login-form input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-main); transition: 0.3s; }
+        .login-form input:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-prihlasit { background-color: #00d26a; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
+        .btn-prihlasit:hover { background-color: #00b359; transform: translateY(-2px); }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1050; display: flex; flex-direction: column; gap: 10px; }
+        .custom-toast { min-width: 250px; background-color: var(--bg-card); color: var(--text-main); border-left: 5px solid var(--accent); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; font-size: 15px; animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards; }
+        .custom-toast.error { border-left-color: #dc3545; }
+        .custom-toast.success { border-left-color: #00d26a; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100% !important; height: auto !important; position: fixed !important; bottom: 0 !important; top: auto !important; left: 0 !important;
+                padding: 10px 5px !important; flex-direction: column !important; border-radius: 20px 20px 0 0; z-index: 9999 !important;
+                background-color: #ff6b35 !important;
+            }
+            .sidebar .profile { display: none; }
+            .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }
+            .sidebar .nav-link { flex: 1 1 24% !important; font-size: 11px !important; text-align: center; margin-bottom: 0; padding: 8px 2px !important; }
+            .sidebar div[style*="margin-top:auto"] { position: static !important; width: 100% !important; margin-top: 5px !important; padding-top: 5px !important; border-top: 1px solid rgba(255,255,255,0.2) !important; display: flex !important; justify-content: center !important; gap: 20px !important; }
+            .main-content { margin-left: 0 !important; padding: 15px; padding-bottom: 150px !important; }
+            .search-bar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'light') document.body.classList.add('light-mode');
+            else if (theme === 'dark') document.body.classList.add('dark-mode');
+        })();
+    </script>
     
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Chyba: ' . $e->getMessage()]);
-}
-?>
+    <div id="toast-container"></div>
+
+    <div class="sidebar">
+        <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
+            <img src="https://placehold.co/80" alt="Avatar">
+        </div>
+        <nav>
+            <a href="index.html" class="nav-link">🏠 Domů</a>
+            <a href="obchod.html" class="nav-link">🛒 Obchod</a>
+            <a href="inventory.html" class="nav-link">📦 Inventář</a>
+            <a href="trziste.html" class="nav-link">📈 Tržiště</a>
+            <a href="minihry.html" class="nav-link">🎮 Minihry</a>
+            <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="profil.html" class="nav-link">👤 Profil</a>
+            <a href="login.html" class="nav-link active">🔐 Login</a>
+        </nav>
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
+            <a href="#" class="nav-link" onclick="odhlasit()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-bar">
+            <button style="background: transparent; border: none; color: var(--text-main);"><i class="fas fa-bars"></i></button>
+            <input type="text" placeholder="Hledat...">
+            <button style="background: transparent; border: none; color: var(--text-main);"><i class="fas fa-search"></i></button>
+        </div>
+
+        <div class="login-form">
+            <h2 style="text-align: center; margin-bottom: 25px;">Přihlášení</h2>
+            
+            <label>Uživatelské jméno (Username):</label>
+            <input type="text" id="username" placeholder="Zadej své jméno">
+            
+            <label>Heslo:</label>
+            <input type="password" id="password" placeholder="Zadej své heslo">
+            
+            <button class="btn-prihlasit" onclick="Login()">Přihlásit se</button>
+            
+            <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                Ještě nemáš účet? <a href="registrace.html" style="color: #00d26a; text-decoration: none; font-weight: bold;">Zaregistrovat se</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let icon = '<i class="fas fa-info-circle me-2"></i>';
+            if(type === 'success') icon = '<i class="fas fa-check-circle me-2 text-success"></i>';
+            if(type === 'error') icon = '<i class="fas fa-exclamation-circle me-2 text-danger"></i>';
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3300);
+        }
+
+        async function Login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showToast("Vyplň obě pole!", 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast("Přihlášení úspěšné!", 'success');
+                    setTimeout(() => { window.location.href = "index.html"; }, 1000);
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast("Chyba při přihlašování.", 'error');
+            }
+        }
+    </script>
+</body>
+</html>

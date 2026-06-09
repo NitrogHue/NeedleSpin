@@ -43,12 +43,12 @@
         .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; flex-grow: 1; display: flex; flex-direction: column; position: relative; }
 
         .sort-container { position: relative; display: inline-block; }
-        .sort-btn { 
-            background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); 
+        .sort-btn {
+            background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);
             padding: 8px 15px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px;
         }
         .sort-popup {
-            display: none; position: absolute; right: 0; top: 110%; background: var(--bg-card); 
+            display: none; position: absolute; right: 0; top: 110%; background: var(--bg-card);
             border: 1px solid var(--border-color); border-radius: 8px; min-width: 180px; z-index: 1050;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
@@ -58,8 +58,8 @@
         .sort-option.active { color: var(--accent); font-weight: bold; }
 
         .search-bar-container { margin-bottom: 20px; }
-        .search-bar input { 
-            background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); 
+        .search-bar input {
+            background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color);
             padding: 10px 15px; border-radius: 8px 0 0 8px; outline: none; width: 300px;
         }
         .search-bar button {
@@ -94,18 +94,19 @@
         .footer a:hover { text-decoration: underline; }
 
         @media (max-width: 768px) {
-            .sidebar { 
+            .sidebar {
                 width: 100% !important; height: auto !important; position: fixed !important; bottom: 0 !important; top: auto !important; left: 0 !important;
                 padding: 10px 5px !important; flex-direction: column !important; border-radius: 20px 20px 0 0; z-index: 9999 !important;
                 background-color: #ff6b35 !important;
             }
             .sidebar .profile { display: none; }
             .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }
-            .sidebar .nav-link { flex: 1 1 22% !important; font-size: 11px !important; text-align: center; margin-bottom: 0; }
+            /* Změněno na 24%, aby se tam krásně vešlo 4+4 tlačítek */
+            .sidebar .nav-link { flex: 1 1 24% !important; font-size: 11px !important; text-align: center; margin-bottom: 0; padding: 8px 2px !important; }
             .sidebar div[style*="position: absolute"] { position: static !important; width: 100% !important; margin-top: 5px !important; padding-top: 5px !important; border-top: 1px solid rgba(255,255,255,0.2) !important; display: flex !important; justify-content: center !important; gap: 20px !important; }
             .main-content { margin-left: 0 !important; padding: 15px; padding-bottom: 150px !important; }
             .search-bar input { width: 200px; }
-            .btn-privacy { top: 15px; right: 15px; font-size: 12px; padding: 6px 12px; } /* Menší tlačítko na mobilech */
+            .btn-privacy { top: 15px; right: 15px; font-size: 12px; padding: 6px 12px; }
         }
     </style>
 </head>
@@ -123,12 +124,13 @@
             <img src="https://placehold.co/80" alt="Avatar">
         </div>
         <nav>
-            <a href="DomovniStranka.html" class="nav-link active" style="font-weight: bold; color: #c44111 !important;">🏠 Domovská stránka</a>
+            <a href="index.html" class="nav-link active" style="font-weight: bold; color: #c44111 !important;">🏠 Domů</a>
             <a href="obchod.html" class="nav-link">🛒 Obchod</a>
             <a href="inventory.html" class="nav-link">📦 Inventář</a>
             <a href="trziste.html" class="nav-link">📈 Tržiště</a>
             <a href="minihry.html" class="nav-link">🎮 Minihry</a>
             <a href="questy.html" class="nav-link">🎯 Questy</a>
+            <a href="profil.html" class="nav-link">👤 Profil</a>
             <a href="login.html" class="nav-link">🔐 Přihlášení</a>
         </nav>
         <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
@@ -201,27 +203,27 @@
     <script src="app.js"></script>
     <script>
 
-        function toggleSortPopup(e) { 
-            e.stopPropagation(); 
-            const p = document.getElementById('sort-popup'); 
-            p.style.display = p.style.display === 'block' ? 'none' : 'block'; 
+        function toggleSortPopup(e) {
+            e.stopPropagation();
+            const p = document.getElementById('sort-popup');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
         }
         
-        document.addEventListener('click', () => { 
-            const p = document.getElementById('sort-popup'); 
-            if (p) p.style.display = 'none'; 
+        document.addEventListener('click', () => {
+            const p = document.getElementById('sort-popup');
+            if (p) p.style.display = 'none';
         });
 
         let currentSortMethod = 'az';
 
         function sortAlbums(method, label, el, e) {
-            e.stopPropagation(); 
+            e.stopPropagation();
             currentSortMethod = method;
             document.getElementById('current-sort-label').innerText = label;
             document.querySelectorAll('.sort-option').forEach(opt => opt.classList.remove('active'));
-            el.classList.add('active'); 
+            el.classList.add('active');
             document.getElementById('sort-popup').style.display = 'none';
-            executeSort(); 
+            executeSort();
         }
 
         function executeSort() {
@@ -246,10 +248,10 @@
             mappedItems.forEach(item => grid.appendChild(item.el));
         }
 
-        const observer = new MutationObserver(() => { 
-            observer.disconnect(); 
-            executeSort(); 
-            observer.observe(document.getElementById('resultsGrid'), { childList: true }); 
+        const observer = new MutationObserver(() => {
+            observer.disconnect();
+            executeSort();
+            observer.observe(document.getElementById('resultsGrid'), { childList: true });
         });
         
         document.addEventListener("DOMContentLoaded", () => {

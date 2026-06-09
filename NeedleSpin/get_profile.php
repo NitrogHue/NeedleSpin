@@ -12,17 +12,31 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$host = 'localhost'; $db = 'needlespin'; $user = 'root'; $pass = '';
+// PŘIPOJENÍ K IONOS DATABÁZI
+$host = 'db5020657101.hosting-data.io';
+$db   = 'dbs15771817';
+$user = 'dbu1233490';
+$pass = 'SkibidiSigma10@';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $my_id = (int)$_SESSION['user_id'];
+    
+    // --- NOVÉ: Zpracování updatu Bia ---
+    if (isset($_POST['action']) && $_POST['action'] === 'update_bio') {
+        $newBio = trim($_POST['bio'] ?? '');
+        $stmt = $pdo->prepare("UPDATE users SET bio = ? WHERE user_id = ?");
+        $stmt->execute([$newBio, $my_id]);
+        echo json_encode(['success' => true, 'message' => 'Bio úspěšně upraveno!']);
+        exit;
+    }
+
     $target_id = isset($_GET['id']) ? (int)$_GET['id'] : $my_id;
     $is_own_profile = ($my_id === $target_id);
 
-    $stmt = $pdo->prepare("SELECT uzivatelskeJmeno, body, hide_stats FROM users WHERE user_id = ?");
+    $stmt = $pdo->prepare("SELECT uzivatelskeJmeno, body, hide_stats, bio FROM users WHERE user_id = ?");
     $stmt->execute([$target_id]);
     $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -90,7 +104,6 @@ try {
         $averageRating = $totalRatings > 0 ? round($sumRatings / $totalRatings, 1) : 0;
         $ratingChartData = array_values($ratingCounts);
 
-        // --- ZRUŠENÝ FILTR: Nejhodnotnější alba (ukáže vše) ---
         $stmt = $pdo->prepare("
             SELECT COALESCE(a.nazev, 'Neznámé album') as nazev, a.cover_url, ua.sell_price 
             FROM user_albums ua 
@@ -102,13 +115,54 @@ try {
         $stmt->execute([$target_id]);
         $valuableAlbums = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // --- AUTO-FIX: Oprav rozbita alba tohoto uzivatele na pozadi ---
+        $stmtBroken = $pdo->prepare("
+            SELECT DISTINCT a.album_id FROM albums a
+            JOIN ratings r ON r.Albums_album_id = a.album_id
+            WHERE r.Users_user_id = ?
+            AND (a.cover_url = '' OR a.cover_url IS NULL OR a.nazev = 'Unknown Album')
+            LIMIT 5
+        ");
+        $stmtBroken->execute([$target_id]);
+        $brokenAlbums = $stmtBroken->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ($brokenAlbums as $broken_id) {
+            $apiUrl = "https://api.discogs.com/releases/{$broken_id}";
+            $ch = curl_init($apiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'NeedleSpin/1.0 +https://needlespin.cz');
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 200 && $response) {
+                $discogsData = json_decode($response, true);
+                $newNazev = $discogsData['title'] ?? null;
+                $newCover = $discogsData['images'][0]['uri'] ?? ($discogsData['thumb'] ?? null);
+                $newRok   = isset($discogsData['year']) && $discogsData['year'] > 0 ? $discogsData['year'] : null;
+
+                $fields = []; $values = [];
+                if ($newNazev)  { $fields[] = 'nazev = ?';      $values[] = $newNazev; }
+                if ($newCover)  { $fields[] = 'cover_url = ?';  $values[] = $newCover; }
+                if ($newRok)    { $fields[] = 'rok_vydani = ?'; $values[] = $newRok; }
+                if (!empty($fields)) {
+                    $values[] = $broken_id;
+                    $stmtFix = $pdo->prepare("UPDATE albums SET " . implode(', ', $fields) . " WHERE album_id = ?");
+                    $stmtFix->execute($values);
+                }
+            }
+            usleep(100000);
+        }
+        // --- KONEC AUTO-FIX ---
+
         $stmt = $pdo->prepare("
-            SELECT COALESCE(a.nazev, 'Neznámé album') as nazev, a.cover_url, r.hodnoceni, DATE_FORMAT(r.hodnoceni_Datum, '%d.%m.%Y') as datum 
+            SELECT COALESCE(a.nazev, 'Neznámé album') as nazev, a.cover_url, r.hodnoceni, r.komentar, DATE_FORMAT(r.hodnoceni_Datum, '%d.%m.%Y') as datum 
             FROM ratings r 
             JOIN albums a ON a.album_id = r.Albums_album_id 
             WHERE r.Users_user_id = ? 
             ORDER BY r.hodnoceni_Datum DESC 
-            LIMIT 4
+            LIMIT 10
         ");
         $stmt->execute([$target_id]);
         $recentRatings = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -121,6 +175,7 @@ try {
         'stats_hidden_from_viewer' => $stats_hidden_from_viewer,
         'relation' => $relation,
         'username' => $userData['uzivatelskeJmeno'],
+        'bio' => $userData['bio'],
         'body' => $userData['body'],
         'friends' => $friends,
         'requests' => $requests,
@@ -134,5 +189,4 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Chyba DB: ' . $e->getMessage()]);
 }
-
 ?>

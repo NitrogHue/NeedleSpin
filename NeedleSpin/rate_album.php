@@ -1,6 +1,7 @@
 <?php
 session_start();
 header('Content-Type: application/json');
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Musíš být přihlášený pro hodnocení.']);
     exit;
@@ -14,10 +15,12 @@ if (!$album_id || !$rating) {
     echo json_encode(['success' => false, 'message' => 'Chybí data.']);
     exit;
 }
-$host = 'localhost';
-$db   = 'needlespin';
-$user = 'root';
-$pass = '';
+
+// Připojení k IONOS databázi
+$host = 'db5020657101.hosting-data.io';
+$db   = 'dbs15771817';
+$user = 'dbu1233490';
+$pass = 'SkibidiSigma10@';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
@@ -42,5 +45,4 @@ try {
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Chyba DB: ' . $e->getMessage()]);
 }
-
 ?>

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: needlespin_web
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: needlespin_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: RootSkibidiSigma@1024
+      MYSQL_DATABASE: needlespin
+      MYSQL_USER: needlespin_user
+      MYSQL_PASSWORD: SkibidiSigma@1024
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d 
+
+volumes:
+  db_data:

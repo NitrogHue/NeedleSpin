@@ -22,7 +22,7 @@ async function Login() {
         
         if (data.success) {
             alert("Přihlášení úspěšné!");
-            window.location.href = "DomovniStranka.html";
+            window.location.href = "index.html";
         } else {
             alert(data.message);
         }

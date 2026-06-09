@@ -8,7 +8,7 @@
 </head>
 <body>
 
-    <a class="back-btn" href="DomovniStranka.html">← Zpět na domovskou stránku</a>
+    <a class="back-btn" href="index.html">← Zpět na domovskou stránku</a>
 
     <div id="loading-msg">
         <div class="spinner-border text-light" role="status"></div>
@@ -66,6 +66,7 @@
 
     <script>
         let currentAlbumId = null;
+        let currentAlbumMeta = {};
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -115,6 +116,14 @@
             document.getElementById('artist').innerText = artist;
             document.getElementById('year').innerText = year ? `Vydáno: ${year}` : "";
             document.getElementById('genre-container').innerHTML = genresHtml;
+
+            // Uloz metadata alba pro pozdejsi pouziti pri hodnoceni
+            currentAlbumMeta = {
+                meta_title:  title,
+                meta_artist: artist,
+                meta_cover:  coverUrl,
+                meta_year:   year || null
+            };
 
             // --- TRACKLIST S HVĚZDIČKAMI ---
             const tbody = document.getElementById('tracklist-body');
@@ -177,19 +186,21 @@
             if (!stars) { alert("Vyber prosím hvězdičky!"); return; }
 
             await sendData({
-                album_id: currentAlbumId, 
+                album_id: currentAlbumId,
                 rating: stars.value,
-                comment: comment
+                comment: comment,
+                ...currentAlbumMeta
             });
         }
 
        async function odeslatRatingSong(trackIndex, ratingValue) {
     await sendData({
         type: 'song',
-        song_id: trackIndex, 
+        song_id: trackIndex,
         album_id: currentAlbumId,
         rating: ratingValue,
-        comment: ""
+        comment: "",
+        ...currentAlbumMeta
     });
 }
         

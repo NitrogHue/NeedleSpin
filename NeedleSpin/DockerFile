@@ -1,0 +1,14 @@
+# Oficiální obraz PHP 8.2 s Apache web serverem
+FROM php:8.2-apache
+
+# Instalace nezbytného PDO rozšíření pro komunikaci s MySQL databází
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Zkopírování celého kódu NeedleSpin do složky webserveru v kontejneru
+COPY . /var/www/html/
+
+# Nastavení práv, aby server mohl správně číst CSS, JS a PHP soubory
+RUN chown -R www-data:www-data /var/www/html/
+
+# Otevření portu 80
+EXPOSE 80
