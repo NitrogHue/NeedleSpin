@@ -147,5 +147,6 @@ try {
 } catch (Exception $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
     echo json_encode(['success' => false, 'message' => 'Chyba: ' . $e->getMessage()]);
+    
 }
 ?>

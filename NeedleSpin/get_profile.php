@@ -134,4 +134,5 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Chyba DB: ' . $e->getMessage()]);
 }
+
 ?>

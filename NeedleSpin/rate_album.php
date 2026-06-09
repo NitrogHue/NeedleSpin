@@ -23,7 +23,6 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // 2. Zkontrolujeme, jestli už tento uživatel toto album hodnotil
     $stmt = $pdo->prepare("SELECT rating_id FROM ratings WHERE Users_user_id = ? AND Albums_album_id = ?");
     $stmt->execute([$user_id, $album_id]);
     $existing = $stmt->fetch();
@@ -43,4 +42,5 @@ try {
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Chyba DB: ' . $e->getMessage()]);
 }
+
 ?>
