@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        /* --- DEFINICE BAREV --- */
         :root {
             --bg-main: #1a1a2e; --bg-sidebar: #ff6b35; --bg-card: #2d2d44;
             --text-main: #ffffff; --text-muted: #aaa; --border-color: #5a5a7a;
@@ -34,7 +33,6 @@
             border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s;
         }
         
-        /* VYCENTROVÁNÍ PROFILOVKY */
         .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
         .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
         
@@ -68,7 +66,7 @@
             padding: 10px 15px; border-radius: 0 8px 8px 0; cursor: pointer;
         }
 
-        /* Tlačítko pro Soukromí vpravo nahoře */
+
         .btn-privacy {
             background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted);
             padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: 0.3s;
@@ -76,7 +74,7 @@
         }
         .btn-privacy:hover { background: rgba(128,128,128,0.1); color: var(--text-main); }
 
-        /* --- STYLY PRO PRIVACY MODAL --- */
+    
         .privacy-modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;

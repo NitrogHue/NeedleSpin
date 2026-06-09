@@ -22,7 +22,6 @@ try {
     $target_id = isset($_GET['id']) ? (int)$_GET['id'] : $my_id;
     $is_own_profile = ($my_id === $target_id);
 
-    // ZÁKLADNÍ INFO + SOUKROMÍ
     $stmt = $pdo->prepare("SELECT uzivatelskeJmeno, body, hide_stats FROM users WHERE user_id = ?");
     $stmt->execute([$target_id]);
     $userData = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -35,7 +34,6 @@ try {
     $is_hidden = ($userData['hide_stats'] == 1);
     $stats_hidden_from_viewer = (!$is_own_profile && $is_hidden);
 
-    // VZTAHY K CIZÍMU PROFILU
     $relation = ['friend_status' => 'none', 'is_following' => false];
     if (!$is_own_profile) {
         $stmt = $pdo->prepare("SELECT status, user_id FROM friends WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)");
@@ -51,13 +49,10 @@ try {
         $stmt->execute([$my_id, $target_id]);
         if ($stmt->fetch()) $relation['is_following'] = true;
     }
-
-    // PŘÁTELÉ
     $stmt = $pdo->prepare("SELECT u.user_id, u.uzivatelskeJmeno FROM friends f JOIN users u ON (u.user_id = f.friend_id OR u.user_id = f.user_id) WHERE (f.user_id = ? OR f.friend_id = ?) AND f.status = 'accepted' AND u.user_id != ?");
     $stmt->execute([$target_id, $target_id, $target_id]);
     $friends = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // ŽÁDOSTI
     $requests = [];
     if ($is_own_profile) {
         $stmt = $pdo->prepare("SELECT f.id as request_id, u.user_id, u.uzivatelskeJmeno FROM friends f JOIN users u ON u.user_id = f.user_id WHERE f.friend_id = ? AND f.status = 'pending'");
@@ -65,7 +60,6 @@ try {
         $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // POČET SLEDUJÍCÍCH
     $stmt = $pdo->prepare("SELECT COUNT(*) as pocet FROM follows WHERE following_id = ?");
     $stmt->execute([$target_id]);
     $followers_count = $stmt->fetch(PDO::FETCH_ASSOC)['pocet'];
@@ -78,7 +72,6 @@ try {
     if ($stats_hidden_from_viewer) {
         $userData['body'] = 'Skryto';
     } else {
-        // GRAF
         $stmt = $pdo->prepare("SELECT hodnoceni, COUNT(*) as pocet FROM ratings WHERE Users_user_id = ? GROUP BY hodnoceni");
         $stmt->execute([$target_id]);
         $ratingsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -109,7 +102,6 @@ try {
         $stmt->execute([$target_id]);
         $valuableAlbums = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // --- ZRUŠENÝ FILTR: Poslední hodnocená alba (ukáže vše) ---
         $stmt = $pdo->prepare("
             SELECT COALESCE(a.nazev, 'Neznámé album') as nazev, a.cover_url, r.hodnoceni, DATE_FORMAT(r.hodnoceni_Datum, '%d.%m.%Y') as datum 
             FROM ratings r 

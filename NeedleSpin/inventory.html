@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- DEFINICE BAREV PRO OBA REŽIMY --- */
         :root {
             /* Tmavý režim (Výchozí) */
             --bg-main: #1a1a2e;
@@ -44,7 +43,6 @@
             --progress-bg: #1a1a1a;
         }
         
-        /* --- ZÁKLADNÍ STYLY --- */
         body { 
             background-color: var(--bg-main) !important; 
             color: var(--text-main) !important; 
@@ -53,7 +51,6 @@
             min-height: 100vh;
         }
 
-        /* Sidebar - fixní vlevo */
         .sidebar {
             background-color: var(--bg-sidebar) !important;
             height: 100vh; position: fixed; top: 0; left: 0; width: 250px;
@@ -63,7 +60,6 @@
             display: flex; flex-direction: column;
         }
 
-        /* Profil v sidebaru - VYCENTROVÁNO */
         .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
         .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); }
 
@@ -74,10 +70,8 @@
         }
         .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
 
-        /* Hlavní obsah */
         .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
 
-        /* Karty alb */
         .album-card { 
             background-color: var(--bg-card) !important; 
             border: 1px solid var(--border-color) !important;
@@ -87,7 +81,6 @@
         
         .album-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
 
-        /* Sort Popup */
         .sort-container { position: relative; display: inline-block; }
         .sort-btn { 
             background-color: var(--bg-card); color: var(--text-main); 
@@ -111,7 +104,6 @@
 
         .text-muted { color: var(--text-muted) !important; }
 
-        /* --- NOTIFIKAČNÍ TOASTY --- */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -147,7 +139,6 @@
             to { opacity: 0; }
         }
 
-        /* --- STYLOVÉ POTVRZOVACÍ OKNO --- */
         .confirm-modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;
@@ -169,7 +160,6 @@
             border-radius: 8px; flex: 1; cursor: pointer; font-weight: bold;
         }
 
-        /* Mobilní responzivita */
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0;
@@ -284,7 +274,6 @@
             }, 3300);
         }
 
-        // Custom Confirm systém
         let currentConfirmCallback = null;
 
         function showConfirmModal(title, text, callback) {

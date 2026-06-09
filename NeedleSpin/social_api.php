@@ -19,8 +19,6 @@ try {
     if ($action === 'search_users') {
         $query = $_POST['query'] ?? '';
         if (empty($query)) { echo json_encode(['success' => true, 'users' => []]); exit; }
-
-        // Nevyhledávej uživatele, se kterými už máš vazbu (pending nebo accepted)
         $stmt = $pdo->prepare("
             SELECT user_id, uzivatelskeJmeno 
             FROM users 
@@ -54,12 +52,10 @@ try {
         $response = $_POST['response'] ?? null; // 'accept' nebo 'decline'
 
         if ($response === 'accept') {
-            // Změníme status na accepted. Musíme zkontrolovat, že jsi opravdu příjemce (friend_id)
             $stmt = $pdo->prepare("UPDATE friends SET status = 'accepted' WHERE id = ? AND friend_id = ?");
             $stmt->execute([$request_id, $my_id]);
             $msg = "Žádost byla přijata. Jste přátelé!";
         } else {
-            // Smažeme záznam
             $stmt = $pdo->prepare("DELETE FROM friends WHERE id = ? AND friend_id = ?");
             $stmt->execute([$request_id, $my_id]);
             $msg = "Žádost byla odmítnuta.";
@@ -71,7 +67,6 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
-// --- NOVÉ: ODEBRÁNÍ PŘÍTELE ---
 if (isset($_POST['action']) && $_POST['action'] === 'remove_friend') {
     $friend_id = (int)$_POST['friend_id'];
     $stmt = $pdo->prepare("DELETE FROM friends WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)");
@@ -79,22 +74,16 @@ if (isset($_POST['action']) && $_POST['action'] === 'remove_friend') {
     echo json_encode(['success' => true]);
     exit;
 }
-
-// --- NOVÉ: SLEDOVÁNÍ / ZRUŠENÍ SLEDOVÁNÍ (TOGGLE FOLLOW) ---
 if (isset($_POST['action']) && $_POST['action'] === 'toggle_follow') {
     $target_id = (int)$_POST['target_id'];
     $my_id = $_SESSION['user_id'];
-    
-    // Zkontrolujeme, zda už ho sledujeme
     $stmt = $pdo->prepare("SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?");
     $stmt->execute([$my_id, $target_id]);
     
     if ($stmt->fetch()) {
-        // Už sledujeme -> ZRUŠIT SLEDOVÁNÍ
         $pdo->prepare("DELETE FROM follows WHERE follower_id = ? AND following_id = ?")->execute([$my_id, $target_id]);
         echo json_encode(['success' => true, 'is_following' => false]);
     } else {
-        // Nesledujeme -> ZAČÍT SLEDOVAT
         $pdo->prepare("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)")->execute([$my_id, $target_id]);
         echo json_encode(['success' => true, 'is_following' => true]);
     }

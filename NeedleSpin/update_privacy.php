@@ -12,8 +12,6 @@ $host = 'localhost'; $db = 'needlespin'; $user = 'root'; $pass = '';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Načteme 1 (zapnuto) nebo 0 (vypnuto)
     $hide = (isset($_POST['hide_stats']) && $_POST['hide_stats'] == '1') ? 1 : 0;
 
     $stmt = $pdo->prepare("UPDATE users SET hide_stats = ? WHERE user_id = ?");

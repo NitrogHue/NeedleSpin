@@ -1,5 +1,5 @@
 <?php
-// api_minigames.php - BEZ LIMITU NA SKOŘÁPKÁCH
+
 session_start();
 header('Content-Type: application/json');
 
@@ -18,12 +18,10 @@ if (!isset($_SESSION['user_id'])) {
 $userId = $_SESSION['user_id'];
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 
-// --- POMOCNÁ FUNKCE PRO AKTUALIZACI QUESTŮ ---
 function updateQuest($userId, $actionType, $amount, $pdo) {
     $today = date('Y-m-d');
     $currentMonth = date('Y-m');
     
-    // Zkontroluje přidělení (pokud hráč hrál, ale neotevřel si stránku s questy)
     $questsAll = $pdo->query("SELECT id, typ_trvani FROM quests")->fetchAll(PDO::FETCH_ASSOC);
     foreach($questsAll as $q) {
         $qid = $q['id'];
@@ -40,7 +38,6 @@ function updateQuest($userId, $actionType, $amount, $pdo) {
         }
     }
 
-    // Vybere všechny aktivní questy daného typu (Denní, Týdenní i Měsíční naráz)
     $stmt = $pdo->prepare("
         SELECT uq.id, uq.progres, q.cil_pocet, q.odmena 
         FROM user_quests uq 
@@ -54,8 +51,6 @@ function updateQuest($userId, $actionType, $amount, $pdo) {
     ");
     $stmt->execute([$userId, $actionType, $today, $today, $currentMonth]);
     $activeQuests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Všem aktivním questům tohoto typu přidá postup
     foreach ($activeQuests as $quest) {
         $newProgres = $quest['progres'] + $amount;
         if ($newProgres >= $quest['cil_pocet']) {
@@ -67,7 +62,6 @@ function updateQuest($userId, $actionType, $amount, $pdo) {
     }
 }
 try {
-    // --- SKOŘÁPKY (Hra zdarma - LIMIT ODSTRANĚN) ---
     if ($action === 'play_shells') {
         $guess = (int)$_POST['guess'];
         if ($guess < 1 || $guess > 3) {
@@ -94,7 +88,6 @@ try {
         exit;
     }
 
-    // --- MINY: START HRY ---
     if ($action === 'start_mines') {
         $bet = (int)$_POST['bet'];
         $mineCount = (int)$_POST['mines'];
@@ -125,8 +118,6 @@ try {
         updateQuest($userId, 'play_minigame', 1, $pdo);
         echo json_encode(['success' => true, 'message' => 'Hra začala!']); exit;
     }
-
-    // --- MINY: KLIKNUTÍ NA POLÍČKO ---
     if ($action === 'click_mine') {
         if (!isset($_SESSION['mines_game']) || !$_SESSION['mines_game']['active']) {
             echo json_encode(['success' => false, 'message' => 'Hra neběží!']); exit;
@@ -159,8 +150,6 @@ try {
 
         echo json_encode(['success' => true, 'state' => 'safe', 'current_win' => $currentWin, 'multiplier' => number_format($multiplier, 2)]); exit;
     }
-
-    // --- MINY: VYBRAT VÝHRU (CASHOUT) ---
     if ($action === 'cashout_mines') {
         if (!isset($_SESSION['mines_game']) || !$_SESSION['mines_game']['active']) {
             echo json_encode(['success' => false, 'message' => 'Není co vybrat!']); exit;

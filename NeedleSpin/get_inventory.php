@@ -1,5 +1,4 @@
 <?php
-// get_inventory.php
 session_start();
 header('Content-Type: application/json');
 
@@ -22,7 +21,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    // Odstraněn neexistující sloupec 'streams' a rozšířen GROUP BY pro kompatibilitu s MySQL 8+
+    
     $stmt = $pdo->prepare("
         SELECT 
             ua.user_album_id, 
@@ -52,7 +51,6 @@ try {
     $stmt->execute([$_SESSION['user_id']]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Zaokrouhlení průměru na jedno desetinné místo rovnou na serveru
     foreach ($items as &$item) {
         $item['avg_rating'] = round((float)$item['avg_rating'], 1);
     }

@@ -144,8 +144,6 @@ body {
     padding: 20px;
     text-align: center;
 }
-
-/* --- LOGIN FORMULÁŘ [cite: 22, 23] --- */
 .login-form {
     max-width: 400px;
     width: 100%;
@@ -176,8 +174,6 @@ body {
     font-weight: bold;
     border: none;
 }
-
-/* --- OPRAVENÁ RESPONZIVITA (MOBILNÍ BOTTOM BAR) [cite: 28, 30, 31, 32] --- */
 @media (max-width: 768px) {
     .sidebar {
         width: 100%;

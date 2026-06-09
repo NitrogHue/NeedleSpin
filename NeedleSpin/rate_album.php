@@ -1,8 +1,6 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-
-// Kontrola, jestli je hráč přihlášený (předpokládám, že ID ukládáš do $_SESSION['user_id'])
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Musíš být přihlášený pro hodnocení.']);
     exit;
@@ -16,8 +14,6 @@ if (!$album_id || !$rating) {
     echo json_encode(['success' => false, 'message' => 'Chybí data.']);
     exit;
 }
-
-// 1. Připojení k databázi
 $host = 'localhost';
 $db   = 'needlespin';
 $user = 'root';
@@ -33,12 +29,10 @@ try {
     $existing = $stmt->fetch();
 
     if ($existing) {
-        // Pokud ano, aktualizujeme (UPDATE)
         $stmt = $pdo->prepare("UPDATE ratings SET hodnoceni = ?, hodnoceni_Datum = NOW() WHERE rating_id = ?");
         $stmt->execute([$rating, $existing['rating_id']]);
         $msg = 'Hodnocení bylo upraveno!';
     } else {
-        // Pokud ne, vložíme nové (INSERT)
         $stmt = $pdo->prepare("INSERT INTO ratings (hodnoceni, hodnoceni_Datum, Users_user_id, Albums_album_id) VALUES (?, NOW(), ?, ?)");
         $stmt->execute([$rating, $user_id, $album_id]);
         $msg = 'Hodnocení bylo přidáno!';

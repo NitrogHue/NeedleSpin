@@ -8,9 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* --- DEFINICE BAREVNÝCH MOTIVŮ --- */
         :root {
-            /* Tmavý režim (Výchozí) */
             --bg-main: #1a1a2e;
             --bg-sidebar: #ff6b35; 
             --bg-card: #2d2d44;
@@ -23,9 +21,8 @@
         }
 
         body.light-mode {
-            /* Světlý režim */
             --bg-main: #f0f2f5;
-            --bg-sidebar: #ffffff;   /* Bílý navbar pro light mode */
+            --bg-sidebar: #ffffff; 
             --bg-card: #ffffff;
             --text-main: #1a1a2e;
             --text-muted: #555;
@@ -36,7 +33,6 @@
         }
 
         body.dark-mode {
-            /* DARK REŽIM (Čistě černá) */
             --bg-main: #0a0a0a;
             --bg-sidebar: #111111;
             --bg-card: #161616;
@@ -48,8 +44,6 @@
             --accent: #ff4500;
             --progress-bg: #1a1a1a;
         }
-
-        /* --- ZÁKLADNÍ STYLY --- */
         body {
             background-color: var(--bg-main) !important;
             color: var(--text-main) !important;
@@ -57,8 +51,6 @@
             margin: 0; padding: 0; transition: 0.3s;
             min-height: 100vh;
         }
-
-        /* Sidebar */
         .sidebar {
             background-color: var(--bg-sidebar) !important;
             height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
@@ -66,7 +58,6 @@
             display: flex; flex-direction: column; transition: 0.3s;
         }
         
-        /* VYCENTROVÁNÍ PROFILOVKY */
         .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
         .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
         

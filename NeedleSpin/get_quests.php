@@ -1,5 +1,4 @@
 <?php
-// get_quests.php - Denní, Týdenní a Měsíční questy
 session_start();
 header('Content-Type: application/json');
 ini_set('display_errors', 0);
@@ -16,7 +15,6 @@ try {
     $today = date('Y-m-d');
     $currentMonth = date('Y-m');
 
-    // 1. Zkontrolujeme a přidělíme chybějící úkoly (podle jejich typu trvání)
     $quests = $pdo->query("SELECT id, typ_trvani FROM quests")->fetchAll(PDO::FETCH_ASSOC);
     foreach ($quests as $q) {
         $qid = $q['id'];
@@ -34,7 +32,6 @@ try {
         }
     }
 
-    // 2. Vytáhneme hráčovy aktivní úkoly
     $stmt = $pdo->prepare("
         SELECT q.nazev, q.odmena, q.cil_pocet, q.typ_trvani, uq.progres, uq.dokonceno
         FROM user_quests uq

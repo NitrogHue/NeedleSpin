@@ -1,5 +1,4 @@
 <?php
-// market.php - KOMPLETNÍ TRŽIŠTĚ (Prodej, Výměna, Quick Sell)
 session_start();
 header('Content-Type: application/json');
 
@@ -22,7 +21,6 @@ $userId = $_SESSION['user_id'];
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 
 try {
-    // 1. NAČTENÍ TRHU A MOJICH NABÍDEK K VÝMĚNĚ
     if ($action === 'load') {
         $sqlMarket = "SELECT m.id, m.type, m.price, u.uzivatelskeJmeno as seller, m.seller_id,
                       a.nazev as title, a.cover_url, ar.jmeno as artist
@@ -53,7 +51,6 @@ try {
         exit;
     }
 
-    // 2. PŘIDÁNÍ NA TRH Z INVENTÁŘE
     if ($action === 'create_listing') {
         $userAlbumId = $_POST['user_album_id'];
         $type = $_POST['type']; // 'sell' nebo 'trade'
@@ -69,7 +66,6 @@ try {
         echo json_encode(['success' => true, 'message' => 'Úspěšně přidáno na trh.']); exit;
     }
 
-    // 3. KOUPIT ZA BODY
     if ($action === 'buy') {
         $marketId = $_POST['market_id'];
         $pdo->beginTransaction();
@@ -91,8 +87,6 @@ try {
         $pdo->commit();
         echo json_encode(['success' => true, 'message' => 'Koupeno!']); exit;
     }
-
-    // 4. NABÍDNOUT VÝMĚNU
     if ($action === 'make_offer') {
         $listingId = $_POST['listing_id'];
         $offeredUserAlbumId = $_POST['offered_user_album_id'];
@@ -107,7 +101,6 @@ try {
         echo json_encode(['success' => true, 'message' => 'Nabídka na výměnu odeslána!']); exit;
     }
 
-    // 5. PŘIJMOUT VÝMĚNU
     if ($action === 'accept_offer') {
         $offerId = $_POST['offer_id'];
         $pdo->beginTransaction();
@@ -128,8 +121,6 @@ try {
         $pdo->commit();
         echo json_encode(['success' => true, 'message' => 'Výměna úspěšná!']); exit;
     }
-
-    // 6. RYCHLÝ PRODEJ DO SYSTÉMU (Quick Sell)
     if ($action === 'quick_sell') {
         $userAlbumId = $_POST['user_album_id'];
         $pdo->beginTransaction();

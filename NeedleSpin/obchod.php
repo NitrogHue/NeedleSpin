@@ -1,5 +1,4 @@
 <?php
-// obchod.php - FINAL FIX (Smart Random + Quick Sell Prices)
 session_start();
 header('Content-Type: application/json');
 
@@ -23,8 +22,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 $userId = $_SESSION['user_id'];
-
-// 1. NAČTENÍ BODŮ
 $stmt = $pdo->prepare("SELECT body FROM users WHERE user_id = ?");
 $stmt->execute([$userId]);
 $userPoints = $stmt->fetchColumn();
@@ -58,9 +55,8 @@ switch ($packType) {
     default: $apiParams = "&genre=Rock"; $packId = 3;
 }
 
-// 3. SMART RANDOM (85% Hity za 25B / 15% Vzácnější za 50B)
 $chance = rand(1, 100);
-$sellPrice = 25; // Výchozí cena
+$sellPrice = 25; 
 
 if ($chance <= 85) {
     $randomPage = rand(1, 10);
@@ -88,7 +84,6 @@ if (empty($data['results'])) {
 $winnerIndex = rand(0, count($data['results']) - 1);
 $winner = $data['results'][$winnerIndex];
 
-// 4. UKLÁDÁNÍ DO DB (Transakce)
 try {
     $pdo->beginTransaction();
 
@@ -123,7 +118,6 @@ try {
             ->execute([$albumId, $metaTitle, $cover, $artistId]);
     }
 
-    // Uložíme i prodejní cenu (sell_price)
     $stmtInv = $pdo->prepare("INSERT INTO user_albums (user_id, album_id, from_pack_id, sell_price) VALUES (?, ?, ?, ?)");
     $stmtInv->execute([$userId, $albumId, $packId, $sellPrice]);
 

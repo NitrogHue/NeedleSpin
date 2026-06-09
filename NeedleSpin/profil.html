@@ -29,8 +29,6 @@
         body { background-color: var(--bg-main) !important; color: var(--text-main) !important; font-family: Arial, sans-serif; transition: 0.3s; min-height: 100vh; margin: 0; }
         
         .sidebar { background-color: var(--bg-sidebar) !important; height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s;}
-        
-        /* VYCENTROVÁNÍ PROFILOVKY */
         .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; width: 100%; }
         .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
         
@@ -313,16 +311,12 @@
 
                 const response = await fetch('get_profile.php?t=' + new Date().getTime() + queryParam);
                 const data = await response.json();
-
-                // POKUD SE NEPODAŘÍ ZÍSKAT DATA (NENÍ PŘIHLÁŠEN)
                 if (!data.success) { 
                     console.error("Chyba z PHP:", data.message);
                     document.getElementById('login-overlay').style.display = 'block';
                     document.getElementById('main-profile-content').style.display = 'none';
                     return; 
                 }
-
-                // POKUD JE PŘIHLÁŠEN, UKÁŽEME OBSAH PROFILU
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-profile-content').style.display = 'block';
 
@@ -382,8 +376,6 @@
                     }
                     document.getElementById('hideStatsToggle').checked = data.hide_stats_enabled;
                 }
-                
-                // SKRYTÍ / VYKRESLENÍ GRAFŮ A TABULEK
                 if (data.stats_hidden_from_viewer) {
                     document.getElementById('profile-points').innerText = "Skryto";
                     document.getElementById('stats-content-wrapper').innerHTML = `
@@ -429,7 +421,6 @@
                     }
                 }
 
-                // Přátelé a Žádosti
                 const friendsGrid = document.getElementById('friends-list-grid');
                 friendsGrid.innerHTML = '';
                 if (!data.friends || data.friends.length === 0) {

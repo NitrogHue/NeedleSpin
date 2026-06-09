@@ -1,8 +1,7 @@
 <?php
-// leaderboard.php
 session_start();
 header('Content-Type: application/json');
-ini_set('display_errors', 0); // Vypne errory, aby nerozbily JSON
+ini_set('display_errors', 0); 
 
 $host = 'localhost'; 
 $db   = 'needlespin'; 
