@@ -9,6 +9,7 @@
     <style>
         /* --- DEFINICE BAREVNÝCH MOTIVŮ --- */
         :root {
+            /* Tmavý režim (Výchozí) */
             --bg-main: #1a1a2e;
             --bg-sidebar: #ff6b35; 
             --bg-card: #2d2d44;
@@ -22,6 +23,7 @@
         }
 
         body.light-mode {
+            /* Světlý režim */
             --bg-main: #f0f2f5;
             --bg-sidebar: #ffffff;   
             --bg-card: #ffffff;
@@ -34,6 +36,7 @@
             --trade-box-border: #0dcaf0;
         }
         body.dark-mode {
+            /* DARK REŽIM (Čistě černá) */
             --bg-main: #0a0a0a;
             --bg-sidebar: #111111;
             --bg-card: #161616;
@@ -46,6 +49,7 @@
             --progress-bg: #1a1a1a;
         }
 
+        /* --- ZÁKLADNÍ STYLY --- */
         body { 
             background-color: var(--bg-main) !important; 
             color: var(--text-main) !important; 
@@ -55,6 +59,7 @@
             min-height: 100vh;
         }
 
+        /* Sidebar */
         .sidebar {
             background-color: var(--bg-sidebar) !important;
             height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
@@ -75,11 +80,8 @@
 
         .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
 
-        .album-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
+        /* Karty trhu */
+        .album-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
 
         .album-card { 
             background-color: var(--bg-card); border-radius: 10px; padding: 20px; 
@@ -95,6 +97,7 @@
             padding: 5px 10px; border-radius: 20px; font-size: 12px; color: #ff6b35; 
         }
 
+        /* Box pro Trade Offer */
         .trade-offer-box {
             background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 20px; 
             border: 2px solid var(--trade-box-border); box-shadow: 0 0 15px rgba(13, 202, 240, 0.2);
@@ -102,6 +105,7 @@
         }
         .trade-album-img { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 
+        /* Search bar */
         .search-bar {
             background-color: var(--bg-card);
             border: 1px solid var(--input-border);
@@ -110,6 +114,7 @@
         }
         .search-bar input { background: transparent; border: none; color: var(--text-main); flex: 1; outline: none; margin: 0 10px; }
 
+        /* Custom Dropdown v modálu */
         .custom-select-trigger { 
             background: var(--input-bg); border: 1px solid var(--input-border); 
             padding: 12px; border-radius: 6px; cursor: pointer; display: flex; 
@@ -127,46 +132,22 @@
         h1, h4 { color: var(--text-main) !important; }
         .text-muted { color: var(--text-muted) !important; }
 
-        #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .custom-toast {
-            min-width: 250px;
-            background-color: var(--bg-card);
-            color: var(--text-main);
-            border-left: 5px solid var(--accent);
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            font-size: 15px;
-            animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards;
-        }
+        /* --- NOTIFIKAČNÍ TOASTY --- */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1050; display: flex; flex-direction: column; gap: 10px; }
+        .custom-toast { min-width: 250px; background-color: var(--bg-card); color: var(--text-main); border-left: 5px solid var(--accent); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; font-size: 15px; animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards; }
         .custom-toast.error { border-left-color: #dc3545; }
         .custom-toast.success { border-left-color: #198754; }
         .custom-toast.warning { border-left-color: #ffc107; }
 
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
+        /* MOBILNÍ LAYOUT */
         @media (max-width: 768px) {
             .sidebar {
                 width: 100% !important; height: auto !important; position: fixed !important; bottom: 0 !important; top: auto !important; left: 0 !important;
                 padding: 10px 5px !important; flex-direction: column !important; border-radius: 20px 20px 0 0; z-index: 9999 !important;
-                background-color: #ff6b35 !important;
+                background-color: #ff6b35 !important; border-right: none;
             }
             .sidebar .profile { display: none; }
             .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }

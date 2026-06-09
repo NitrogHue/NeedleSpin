@@ -31,95 +31,144 @@
             --accent: #ff6b35;
             --card-shadow: rgba(0, 0, 0, 0.05);
         }
-
         body.dark-mode {
             --bg-main: #0a0a0a;
             --bg-sidebar: #111111;
             --bg-card: #161616;
+            --bg-item: #0a0a0a;
             --text-main: #e0e0e0;
             --text-muted: #777;
-            --input-bg: #111111;
-            --input-border: #333;
+            --border-color: #333;
+            --item-border: #333;
             --accent: #ff4500;
-            --card-shadow: rgba(0, 0, 0, 0.5);
+            --progress-bg: #1a1a1a;
         }
 
-        body { background-color: var(--bg-main) !important; color: var(--text-main) !important; font-family: Arial, sans-serif; transition: 0.3s; margin: 0; min-height: 100vh; }
+        body {
+            background-color: var(--bg-main) !important;
+            color: var(--text-main) !important;
+            font-family: Arial, sans-serif;
+            margin: 0; padding: 0; transition: 0.3s;
+            min-height: 100vh;
+        }
 
         .sidebar {
             background-color: var(--bg-sidebar) !important;
             height: 100vh; position: fixed; width: 250px; padding: 20px; z-index: 1000;
-            border-right: 1px solid var(--input-border); transition: 0.3s; display: flex; flex-direction: column;
+            border-right: 1px solid var(--input-border);
+            transition: 0.3s;
+            display: flex; flex-direction: column;
         }
+
+        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; width: 100%; }
+        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; background-color: white; padding: 5px; object-fit: cover; border: 3px solid var(--accent); display: block; margin: 0 auto; }
         
-        .sidebar .profile { margin-bottom: 30px; display: flex; justify-content: center; }
-        .sidebar .profile img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); background-color: white; object-fit: cover; }
-        
-        .sidebar .nav-link { color: var(--text-main) !important; padding: 12px; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px; }
+        .sidebar .nav-link { 
+            color: var(--text-main) !important; 
+            padding: 12px; text-decoration: none; display: block; border-radius: 8px; margin-bottom: 5px;
+        }
         .sidebar .nav-link:hover { background-color: var(--accent); color: white !important; }
 
-        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        .main-content { margin-left: 250px; padding: 30px; transition: 0.3s; }
 
-        .search-bar { background-color: var(--bg-card); border-radius: 20px; padding: 5px 15px; display: flex; align-items: center; width: 100%; max-width: 600px; margin-bottom: 50px; box-shadow: 0 2px 10px var(--card-shadow); position: absolute; top: 30px; }
-        .search-bar input { background: transparent; border: none; color: var(--text-main); padding: 10px; width: 100%; outline: none; }
+        .login-form {
+            max-width: 450px; width: 100%; margin: 40px auto;
+            background-color: var(--bg-card); border: 1px solid var(--input-border);
+            padding: 30px; border-radius: 10px; box-sizing: border-box;
+            box-shadow: 0 4px 15px var(--card-shadow);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .login-form h2 { color: var(--text-main); margin-bottom: 25px; text-align: center; }
+        .login-form label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+        .login-form input {
+            background-color: var(--input-bg); border: 2px solid var(--input-border);
+            color: var(--text-main); padding: 12px; border-radius: 8px;
+            width: 100%; margin-bottom: 15px; box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .login-form input:focus { outline: none; border-color: var(--accent); }
 
-        .login-form { background-color: var(--bg-card); padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px var(--card-shadow); border: 1px solid var(--input-border); }
-        .login-form label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-muted); }
-        .login-form input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-main); transition: 0.3s; }
-        .login-form input:focus { border-color: var(--accent); outline: none; }
-        
-        .btn-prihlasit { background-color: #00d26a; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
-        .btn-prihlasit:hover { background-color: #00b359; transform: translateY(-2px); }
+        .btn-prihlasit {
+            background-color: #00d26a; color: white; border: none;
+            padding: 12px; width: 100%; border-radius: 8px;
+            font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; margin-top: 15px;
+        }
+        .btn-prihlasit:hover { background-color: #00b85a; }
 
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1050; display: flex; flex-direction: column; gap: 10px; }
-        .custom-toast { min-width: 250px; background-color: var(--bg-card); color: var(--text-main); border-left: 5px solid var(--accent); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; font-size: 15px; animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards; }
+        .password-checklist {
+            background: rgba(0,0,0,0.1); border: 1px solid var(--input-border);
+            border-radius: 8px; padding: 15px; margin-bottom: 15px;
+            font-size: 13px; color: var(--text-muted);
+        }
+        .password-checklist ul { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .password-checklist li { margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .check-icon { color: #ff4444; width: 15px; text-align: center; }
+        .valid .check-icon { color: #00d26a; }
+        .valid { color: var(--text-main); }
+
+        .search-bar {
+            background-color: var(--bg-card); border: 1px solid var(--input-border);
+            padding: 10px 20px; border-radius: 30px; display: flex; align-items: center;
+            max-width: 500px; width: 100%; margin: 0 auto 30px;
+        }
+        .search-bar input { background: transparent; border: none; color: var(--text-main); flex: 1; outline: none; margin: 0 10px; }
+
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 1050; display: flex; flex-direction: column; gap: 10px;
+        }
+        .custom-toast {
+            min-width: 250px; background-color: var(--bg-card); color: var(--text-main);
+            border-left: 5px solid var(--accent); padding: 15px 20px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; font-size: 15px;
+            animation: slideInRight 0.3s ease forwards, fadeOut 0.3s ease 3s forwards;
+        }
         .custom-toast.error { border-left-color: #dc3545; }
         .custom-toast.success { border-left-color: #00d26a; }
         .custom-toast.warning { border-left-color: #ffc107; }
+
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
+        /* Responzivita (Mobilní bottom bar) */
         @media (max-width: 768px) {
             .sidebar {
-                width: 100% !important; height: auto !important; position: fixed !important; bottom: 0 !important; top: auto !important; left: 0 !important;
-                padding: 10px 5px !important; flex-direction: column !important; border-radius: 20px 20px 0 0; z-index: 9999 !important;
-                background-color: #ff6b35 !important;
+                width: 100%; height: auto; position: fixed; top: auto; bottom: 0; left: 0;
+                display: flex; flex-direction: row; justify-content: space-around; padding: 10px;
+                border-top: 1px solid var(--input-border); border-right: none;
             }
             .sidebar .profile { display: none; }
-            .sidebar nav { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; }
-            .sidebar .nav-link { flex: 1 1 24% !important; font-size: 11px !important; text-align: center; margin-bottom: 0; padding: 8px 2px !important; }
-            .sidebar div[style*="margin-top:auto"] { position: static !important; width: 100% !important; margin-top: 5px !important; padding-top: 5px !important; border-top: 1px solid rgba(255,255,255,0.2) !important; display: flex !important; justify-content: center !important; gap: 20px !important; }
-            .main-content { margin-left: 0 !important; padding: 15px; padding-bottom: 150px !important; }
-            .search-bar { display: none; }
+            .sidebar nav { display: flex; width: 100%; justify-content: space-around; }
+            .sidebar .nav-link { margin-bottom: 0; padding: 8px; font-size: 14px; }
+            .main-content { margin-left: 0; padding-bottom: 80px; }
         }
     </style>
 </head>
 <body>
     <script>
-        (function() {
-            const theme = localStorage.getItem('theme');
-            if (theme === 'light') document.body.classList.add('light-mode');
-            else if (theme === 'dark') document.body.classList.add('dark-mode');
-        })();
+         (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') document.body.classList.add('light-mode');
+        else if (theme === 'dark') document.body.classList.add('dark-mode');
+    })();
     </script>
-    
+
     <div id="toast-container"></div>
 
     <div class="sidebar">
         <div class="profile" style="cursor: pointer;" onclick="window.location.href='profil.html'">
             <img src="https://placehold.co/80" alt="Avatar">
         </div>
-        <nav>
-            <a href="index.html" class="nav-link">🏠 Domů</a>
+
+        <nav style="width: 100%;">
+            <a href="index.html" class="nav-link">🏠 Domovská stránka</a>
             <a href="obchod.html" class="nav-link">🛒 Obchod</a>
-            <a href="inventory.html" class="nav-link">📦 Inventář</a>
             <a href="trziste.html" class="nav-link">📈 Tržiště</a>
             <a href="minihry.html" class="nav-link">🎮 Minihry</a>
             <a href="questy.html" class="nav-link">🎯 Questy</a>
-            <a href="profil.html" class="nav-link">👤 Profil</a>
-            <a href="login.html" class="nav-link">🔐 Login</a>
+            <a href="login.html" class="nav-link">🔐 Přihlášení</a>
         </nav>
-        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
+
+        <div style="margin-top:auto; display:flex; justify-content:center; border-top: 1px solid var(--input-border); padding-top: 10px; width: 100%;">
             <a href="#" class="nav-link" onclick="odhlasit()" style="width: 100%; text-align: center;">📤 Odhlásit se</a>
         </div>
     </div>
@@ -132,29 +181,40 @@
         </div>
 
         <div class="login-form">
-            <h2 style="text-align: center; margin-bottom: 25px;">Registrace</h2>
+            <h2>Registrace</h2>
             
-            <label>Emailová adresa:</label>
-            <input type="email" id="reg-email" placeholder="Zadej svůj email">
-
+            <label>E-mailová adresa:</label>
+            <input type="email" id="email" placeholder="Zadej email">
+            
             <label>Uživatelské jméno:</label>
-            <input type="text" id="reg-username" placeholder="Zvol si jméno">
+            <input type="text" id="reg-username" placeholder="Zadej username">
             
             <label>Heslo:</label>
-            <input type="password" id="reg-password" placeholder="Min. 8 znaků, číslo, velké písmeno, spec. znak">
+            <input type="password" id="reg-password" placeholder="Zadej heslo" onkeyup="checkPasswordStrength()">
+            
+            <div class="password-checklist">
+                <ul>
+                    <li id="req-length"><i class="fas fa-times check-icon"></i> Alespoň 8 znaků</li>
+                    <li id="req-upper"><i class="fas fa-times check-icon"></i> Alespoň jedno velké písmeno</li>
+                    <li id="req-number"><i class="fas fa-times check-icon"></i> Alespoň jedna číslice</li>
+                    <li id="req-special"><i class="fas fa-times check-icon"></i> Alespoň jeden speciální znak</li>
+                </ul>
+            </div>
 
             <label>Potvrzení hesla:</label>
-            <input type="password" id="reg-password-confirm" placeholder="Zadej heslo znovu">
+            <input type="password" id="reg-password2" placeholder="Potvrď heslo">
             
-            <button class="btn-prihlasit" onclick="Registrovat()">Vytvořit účet</button>
+            <button class="btn-prihlasit" onclick="registerUser()">Registrovat se</button>
             
             <p style="text-align: center; margin-top: 20px; font-size: 14px;">
-                Už máš účet? <a href="login.html" style="color: #00d26a; text-decoration: none; font-weight: bold;">Přihlásit se</a>
+                Už máš účet? <a href="login.html" style="color: #00d26a; font-weight: bold; text-decoration: none;">Přihlas se</a>
             </p>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
+
     <script>
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
@@ -170,17 +230,55 @@
             
             container.appendChild(toast);
             
-            setTimeout(() => { toast.remove(); }, 3300);
+            setTimeout(() => {
+                toast.remove();
+            }, 3300);
         }
+        function checkPasswordStrength() {
+            const pwd = document.getElementById('reg-password').value;
 
-        async function Registrovat() {
-            const email = document.getElementById('reg-email').value.trim();
-            const username = document.getElementById('reg-username').value.trim();
+            const reqLength = document.getElementById('req-length');
+            const reqUpper = document.getElementById('req-upper');
+            const reqNumber = document.getElementById('req-number');
+            const reqSpecial = document.getElementById('req-special');
+            if (pwd.length >= 8) {
+                reqLength.classList.add('valid');
+                reqLength.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqLength.classList.remove('valid');
+                reqLength.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+            if (/[A-Z]/.test(pwd)) {
+                reqUpper.classList.add('valid');
+                reqUpper.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqUpper.classList.remove('valid');
+                reqUpper.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+            if (/[0-9]/.test(pwd)) {
+                reqNumber.classList.add('valid');
+                reqNumber.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqNumber.classList.remove('valid');
+                reqNumber.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+
+            if (/[^A-Za-z0-9]/.test(pwd)) {
+                reqSpecial.classList.add('valid');
+                reqSpecial.querySelector('.check-icon').classList.replace('fa-times', 'fa-check');
+            } else {
+                reqSpecial.classList.remove('valid');
+                reqSpecial.querySelector('.check-icon').classList.replace('fa-check', 'fa-times');
+            }
+        }
+        async function registerUser() {
+            const email = document.getElementById('email').value;
+            const username = document.getElementById('reg-username').value;
             const password = document.getElementById('reg-password').value;
-            const password2 = document.getElementById('reg-password-confirm').value;
+            const password2 = document.getElementById('reg-password2').value;
             
-            if (!email || !username || !password || !password2) {
-                showToast("Vyplň všechna pole!", 'warning');
+            if (email === "" || username === "" || password === "" || password2 === "") {
+                showToast("Prosím vyplň všechna pole!", 'warning');
                 return;
             }
             
@@ -205,7 +303,9 @@
                 
                 if (data.success) {
                     showToast("Registrace úspěšná! Vítej " + username, 'success');
-                    setTimeout(() => { window.location.href = "login.html"; }, 1500);
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 1500);
                 } else {
                     showToast(data.message, 'error');
                 }
@@ -215,4 +315,5 @@
         }
     </script>
 </body>
+
 </html>
